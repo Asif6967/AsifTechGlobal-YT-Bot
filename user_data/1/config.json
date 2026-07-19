@@ -1,0 +1,19 @@
+{
+    "ANTI_BAN_SETTINGS": {
+        "HUMAN_SCROLL": true,
+        "MOUSE_MOVE_EMULATION": true
+    },
+    "INTERVAL": 15,
+    "LOOP_SETTINGS": {
+        "ALLOW_DUPLICATE_MESSAGES": false,
+        "BATCH_SLEEP_DELAY": 6
+    },
+    "MAX_DELAY": 6,
+    "MAX_TABS": 5,
+    "MIN_DELAY": 3,
+    "PLATFORM": "youtube",
+    "RANDOM_DELAY": true,
+    "SYSTEM_SETTINGS": {
+        "HEADLESS_MODE": false
+    }
+}

@@ -1,0 +1,59 @@
+2026/07/13-21:29:26.497 29cc Reusing MANIFEST E:\yt\Saved_YT_Session\Default\IndexedDB\https_www.youtube.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/07/13-21:29:26.498 29cc Recovering log #376
+2026/07/13-21:29:26.510 29cc Reusing old log E:\yt\Saved_YT_Session\Default\IndexedDB\https_www.youtube.com_0.indexeddb.leveldb/000376.log 
+2026/07/13-21:29:26.511 29cc Delete type=2 #375
+2026/07/13-21:29:26.511 29cc Delete type=2 #377
+2026/07/13-21:31:05.234 29cc Level-0 table #381: started
+2026/07/13-21:31:05.251 29cc Level-0 table #381: 2057310 bytes OK
+2026/07/13-21:31:05.255 29cc Delete type=0 #376
+2026/07/13-21:31:12.007 29cc Compacting 1@1 + 1@2 files
+2026/07/13-21:31:12.026 29cc Generated table #382@1: 10034 keys, 444474 bytes
+2026/07/13-21:31:12.026 29cc Compacted 1@1 + 1@2 files => 444474 bytes
+2026/07/13-21:31:12.028 29cc compacted to: files[ 0 0 1 0 0 0 0 ]
+2026/07/13-21:46:20.001 46a8 Level-0 table #384: started
+2026/07/13-21:46:20.029 46a8 Level-0 table #384: 2889166 bytes OK
+2026/07/13-21:46:20.035 46a8 Delete type=2 #378
+2026/07/13-21:46:20.035 46a8 Delete type=0 #380
+2026/07/13-21:46:20.035 46a8 Delete type=2 #381
+2026/07/13-21:47:40.441 46a8 Compacting 1@1 + 1@2 files
+2026/07/13-21:47:40.460 46a8 Generated table #385@1: 10351 keys, 444135 bytes
+2026/07/13-21:47:40.460 46a8 Compacted 1@1 + 1@2 files => 444135 bytes
+2026/07/13-21:47:40.463 46a8 compacted to: files[ 0 0 1 0 0 0 0 ]
+2026/07/13-21:47:40.464 46a8 Delete type=2 #382
+2026/07/13-21:47:40.464 46a8 Delete type=2 #384
+2026/07/13-22:02:57.454 29cc Level-0 table #387: started
+2026/07/13-22:02:57.476 29cc Level-0 table #387: 3074052 bytes OK
+2026/07/13-22:02:57.479 29cc Delete type=0 #383
+2026/07/13-22:03:07.371 29cc Compacting 1@1 + 1@2 files
+2026/07/13-22:03:07.389 29cc Generated table #388@1: 10368 keys, 432530 bytes
+2026/07/13-22:03:07.390 29cc Compacted 1@1 + 1@2 files => 432530 bytes
+2026/07/13-22:03:07.394 29cc compacted to: files[ 0 0 1 0 0 0 0 ]
+2026/07/13-22:03:07.394 29cc Delete type=2 #385
+2026/07/13-22:03:07.394 29cc Delete type=2 #387
+2026/07/13-22:18:55.687 29cc Level-0 table #390: started
+2026/07/13-22:18:55.725 29cc Level-0 table #390: 2715353 bytes OK
+2026/07/13-22:18:55.730 29cc Delete type=0 #386
+2026/07/13-22:22:15.369 46a8 Compacting 1@1 + 1@2 files
+2026/07/13-22:22:15.391 46a8 Generated table #391@1: 10510 keys, 416475 bytes
+2026/07/13-22:22:15.391 46a8 Compacted 1@1 + 1@2 files => 416475 bytes
+2026/07/13-22:22:15.395 46a8 compacted to: files[ 0 0 1 0 0 0 0 ]
+2026/07/13-22:22:15.396 46a8 Delete type=2 #388
+2026/07/13-22:22:15.396 46a8 Delete type=2 #390
+2026/07/13-22:51:23.718 29cc Level-0 table #393: started
+2026/07/13-22:51:23.798 29cc Level-0 table #393: 2565203 bytes OK
+2026/07/13-22:51:23.804 29cc Delete type=0 #389
+2026/07/13-22:54:45.648 46a8 Compacting 1@1 + 1@2 files
+2026/07/13-22:54:45.674 46a8 Generated table #394@1: 10780 keys, 435503 bytes
+2026/07/13-22:54:45.674 46a8 Compacted 1@1 + 1@2 files => 435503 bytes
+2026/07/13-22:54:45.678 46a8 compacted to: files[ 0 0 1 0 0 0 0 ]
+2026/07/13-22:54:45.680 46a8 Delete type=2 #391
+2026/07/13-22:54:45.680 46a8 Delete type=2 #393
+2026/07/13-23:24:15.628 29cc Level-0 table #396: started
+2026/07/13-23:24:15.698 29cc Level-0 table #396: 2734167 bytes OK
+2026/07/13-23:24:15.703 29cc Delete type=0 #392
+2026/07/13-23:27:25.647 29cc Compacting 1@1 + 1@2 files
+2026/07/13-23:27:25.676 29cc Generated table #397@1: 11070 keys, 429416 bytes
+2026/07/13-23:27:25.676 29cc Compacted 1@1 + 1@2 files => 429416 bytes
+2026/07/13-23:27:25.680 29cc compacted to: files[ 0 0 1 0 0 0 0 ]
+2026/07/13-23:27:25.680 29cc Delete type=2 #394
+2026/07/13-23:27:25.680 29cc Delete type=2 #396

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>YT Bot — Login</title>
+<style>
+:root{
+  --bg:#0d1117;--bg2:#161b22;--border:#21262d;--border2:#30363d;
+  --text:#e6edf3;--muted:#8b949e;--green:#00ff88;--green2:#238636;
+  --red:#da3633;--red2:#f85149;--blue:#1f6feb;--yellow:#e3b341;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+
+/* ── Background particles (pure CSS) ── */
+body::before{
+  content:'';position:fixed;top:0;left:0;right:0;bottom:0;
+  background:
+    radial-gradient(ellipse at 20% 20%, #00ff8808 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, #1f6feb08 0%, transparent 60%);
+  pointer-events:none;
+}
+
+/* ── Wrapper ── */
+.wrapper{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:20px;
+}
+
+/* ── Logo ── */
+.logo{text-align:center;margin-bottom:28px}
+.logo-icon{
+  width:60px;height:60px;background:linear-gradient(135deg,#00ff88,#1f6feb);
+  border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-size:28px;margin:0 auto 12px;box-shadow:0 0 30px #00ff8830;
+}
+.logo-title{font-size:22px;font-weight:700;color:var(--text);letter-spacing:.5px}
+.logo-sub{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* ── Card ── */
+.card{
+  width:100%;max-width:400px;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:14px;padding:24px;
+}
+
+/* ── Tabs ── */
+.tabs{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:22px;overflow:hidden}
+.tab{
+  flex:1;padding:9px;text-align:center;font-size:13px;font-weight:600;
+  cursor:pointer;color:var(--muted);transition:all .2s;border:none;background:none;
+}
+.tab.active{background:var(--bg2);color:var(--text);border-radius:6px;margin:3px;padding:6px}
+
+/* ── Form ── */
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500}
+.form-input{
+  width:100%;background:var(--bg);border:1px solid var(--border2);
+  color:var(--text);padding:11px 13px;border-radius:8px;font-size:14px;
+  outline:none;transition:border-color .2s;
+}
+.form-input:focus{border-color:var(--green)}
+.form-input::placeholder{color:var(--border2)}
+
+/* ── Submit button ── */
+.submit-btn{
+  width:100%;padding:12px;background:var(--green2);border:none;
+  color:#fff;border-radius:8px;font-size:15px;font-weight:600;
+  cursor:pointer;margin-top:4px;transition:opacity .15s,transform .1s;
+  letter-spacing:.3px;
+}
+.submit-btn:active{opacity:.85;transform:scale(.99)}
+
+/* ── Divider ── */
+.divider{
+  display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--muted);
+  font-size:12px;
+}
+.divider::before,.divider::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+
+/* ── OAuth buttons ── */
+.oauth-btn{
+  width:100%;padding:11px 16px;border:1px solid var(--border2);
+  border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin-bottom:10px;transition:background .2s,border-color .2s;
+  text-decoration:none;color:var(--text);background:var(--bg);
+}
+.oauth-btn:hover{background:var(--border);border-color:var(--muted)}
+.oauth-btn:active{opacity:.8}
+.oauth-btn svg{width:18px;height:18px;flex-shrink:0}
+
+/* ── Error alert ── */
+.alert{
+  background:#2d1212;border:1px solid var(--red);border-radius:8px;
+  padding:10px 13px;font-size:13px;color:var(--red2);margin-bottom:14px;
+  display:none;
+}
+.alert.show{display:block}
+
+/* ── Loading spinner ── */
+.spinner{
+  display:inline-block;width:16px;height:16px;
+  border:2px solid #ffffff44;border-top-color:#fff;
+  border-radius:50%;animation:spin .6s linear infinite;
+  vertical-align:middle;margin-right:6px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── OAuth Setup Modal ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.75);z-index:999;
+  align-items:center;justify-content:center;padding:16px;
+}
+.modal-overlay.open{display:flex}
+.modal-box{
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:14px;padding:24px;width:100%;max-width:420px;
+  max-height:90vh;overflow-y:auto;position:relative;
+  animation:slideUp .2s ease;
+}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+.modal-close{
+  position:absolute;top:14px;right:14px;
+  background:var(--bg3,var(--border2));border:none;color:var(--muted);
+  width:28px;height:28px;border-radius:50%;font-size:14px;cursor:pointer;
+}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:6px;color:var(--text)}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6}
+.modal-sub a{color:var(--blue);text-decoration:none}
+.modal-sub code{background:var(--border);padding:2px 6px;border-radius:4px;font-size:11px;color:var(--green)}
+.modal-result{
+  margin-top:12px;padding:10px 13px;border-radius:8px;
+  font-size:13px;display:none;
+}
+.modal-result.ok{background:#0d2818;border:1px solid var(--green2);color:var(--green)}
+.modal-result.err{background:#2d1212;border:1px solid var(--red);color:var(--red2)}
+/* Badge on OAuth button when configured */
+.oauth-configured{position:relative}
+.oauth-configured::after{
+  content:'✓';position:absolute;top:-6px;right:-6px;
+  background:var(--green2);color:#fff;border-radius:50%;
+  width:18px;height:18px;font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  line-height:18px;text-align:center;
+}
+
+/* ── Sections ── */
+.section{display:none}
+.section.active{display:block}
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+  <!-- Logo -->
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    <div class="logo-title">YT Bot Panel</div>
+    <div class="logo-sub">YouTube Live Chat Automation</div>
+  </div>
+
+  <!-- Card -->
+  <div class="card">
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" id="tab-signin" onclick="switchTab('signin')">Sign In</button>
+      <button class="tab"        id="tab-register" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <!-- Alert -->
+    <div class="alert" id="alert"></div>
+
+    <!-- ── SIGN IN ── -->
+    <div class="section active" id="sec-signin">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="si-email" type="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="si-pass" type="password" placeholder="Enter password" autocomplete="current-password">
+      </div>
+      <button class="submit-btn" id="si-btn" onclick="doLogin()">Sign In</button>
+
+      <div class="divider">OR</div>
+
+      <!-- Google Button — always shown -->
+      <button class="oauth-btn {% if google_on %}oauth-configured{% endif %}" id="google-signin" onclick="oauthClick('google','signin')">
+        <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Continue with Google
+        {% if not google_on %}<span style="margin-left:auto;font-size:10px;color:var(--yellow);background:#2a2408;padding:2px 7px;border-radius:10px">Setup</span>{% endif %}
+      </button>
+
+      <!-- Facebook Button — always shown -->
+      <button class="oauth-btn {% if facebook_on %}oauth-configured{% endif %}" id="fb-signin" onclick="oauthClick('facebook','signin')">
+        <svg viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        Continue with Facebook
+        {% if not facebook_on %}<span style="margin-left:auto;font-size:10px;color:var(--yellow);background:#2a2408;padding:2px 7px;border-radius:10px">Setup</span>{% endif %}
+      </button>
+    </div>
+
+    <!-- ── REGISTER ── -->
+    <div class="section" id="sec-register">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" id="reg-name" type="text" placeholder="Your name" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="reg-email" type="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password <span style="color:var(--muted)">(min 6 chars)</span></label>
+        <input class="form-input" id="reg-pass" type="password" placeholder="Create password" autocomplete="new-password">
+      </div>
+      <button class="submit-btn" id="reg-btn" onclick="doRegister()" style="background:var(--blue)">Create Account</button>
+
+      <div class="divider">OR</div>
+
+      <button class="oauth-btn {% if google_on %}oauth-configured{% endif %}" onclick="oauthClick('google','register')">
+        <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Sign up with Google
+        {% if not google_on %}<span style="margin-left:auto;font-size:10px;color:var(--yellow);background:#2a2408;padding:2px 7px;border-radius:10px">Setup</span>{% endif %}
+      </button>
+
+      <button class="oauth-btn {% if facebook_on %}oauth-configured{% endif %}" onclick="oauthClick('facebook','register')">
+        <svg viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        Sign up with Facebook
+        {% if not facebook_on %}<span style="margin-left:auto;font-size:10px;color:var(--yellow);background:#2a2408;padding:2px 7px;border-radius:10px">Setup</span>{% endif %}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OAuth Setup Modal ══ -->
+<div class="modal-overlay" id="setupModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modal-provider-icon" style="font-size:32px;margin-bottom:10px"></div>
+    <div class="modal-title" id="modal-title">Setup Google Login</div>
+    <div class="modal-sub" id="modal-sub"></div>
+
+    <div id="modal-form">
+      <div class="form-group">
+        <label class="form-label" id="label-id">Client ID</label>
+        <input class="form-input" id="oauth-cid" type="text" placeholder="Paste here...">
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="label-secret">Client Secret</label>
+        <input class="form-input" id="oauth-csec" type="password" placeholder="Paste here...">
+      </div>
+      <button class="submit-btn" id="save-btn" onclick="saveOAuth()" style="margin-top:4px">💾 Save &amp; Apply</button>
+    </div>
+
+    <div class="modal-result" id="modal-result"></div>
+  </div>
+</div>
+
+<script>
+const GOOGLE_ON   = {{ 'true' if google_on   else 'false' }};
+const FACEBOOK_ON = {{ 'true' if facebook_on else 'false' }};
+let   _currentProvider = null;
+
+// Handle error from URL param
+const urlErr = new URLSearchParams(location.search).get('error');
+if (urlErr) showAlert(
+  urlErr === 'google_failed'           ? 'Google login failed. Please try again.' :
+  urlErr === 'facebook_failed'         ? 'Facebook login failed. Please try again.' :
+  urlErr === 'google_not_configured'   ? 'Google login is not configured yet. Enter your Client ID below.' :
+  urlErr === 'facebook_not_configured' ? 'Facebook login is not configured yet. Enter your App ID below.' :
+  'Authentication error. Try again.'
+);
+
+function switchTab(tab) {
+  ['signin','register'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t === tab);
+    document.getElementById('sec-'+t).classList.toggle('active', t === tab);
+  });
+  hideAlert();
+}
+
+function showAlert(msg) {
+  const el = document.getElementById('alert');
+  el.textContent = msg; el.classList.add('show');
+}
+function hideAlert() { document.getElementById('alert').classList.remove('show'); }
+
+function setLoading(btnId, loading, defLabel) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  btn.innerHTML = loading ? '<span class="spinner"></span> Please wait...' : defLabel;
+}
+
+async function doLogin() {
+  const email = document.getElementById('si-email').value.trim();
+  const pass  = document.getElementById('si-pass').value;
+  if (!email || !pass) { showAlert('Please enter email and password'); return; }
+  setLoading('si-btn', true, 'Sign In'); hideAlert();
+  try {
+    const r = await fetch('/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, password: pass})
+    });
+    const d = await r.json();
+    if (d.ok) { window.location.href = '/'; }
+    else { showAlert(d.msg); setLoading('si-btn', false, 'Sign In'); }
+  } catch(e) { showAlert('Connection error.'); setLoading('si-btn', false, 'Sign In'); }
+}
+
+async function doRegister() {
+  const name  = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass  = document.getElementById('reg-pass').value;
+  if (!name || !email || !pass) { showAlert('All fields are required'); return; }
+  setLoading('reg-btn', true, 'Create Account'); hideAlert();
+  try {
+    const r = await fetch('/auth/register', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name, email, password: pass})
+    });
+    const d = await r.json();
+    if (d.ok) { window.location.href = '/'; }
+    else { showAlert(d.msg); setLoading('reg-btn', false, 'Create Account'); }
+  } catch(e) { showAlert('Connection error.'); setLoading('reg-btn', false, 'Create Account'); }
+}
+
+// ── OAuth Button Click ────────────────────────────────────────
+function oauthClick(provider, mode) {
+  const isOn = provider === 'google' ? GOOGLE_ON : FACEBOOK_ON;
+  if (isOn) {
+    window.location.href = '/auth/' + provider;
+  } else {
+    showSetupModal(provider);
+  }
+}
+
+// ── OAuth Setup Modal ─────────────────────────────────────────
+const PROVIDER_INFO = {
+  google: {
+    icon: '🔵',
+    title: 'Setup Google Login',
+    sub: `Get credentials from <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console →</a><br>
+          1. Create a project → APIs &amp; Services → Credentials<br>
+          2. Create OAuth 2.0 Client ID (Web Application)<br>
+          3. Add Authorized Redirect URI:<br>
+          <code>http://localhost:5000/auth/google/callback</code><br>
+          <code>http://YOUR_PC_IP:5000/auth/google/callback</code>`,
+    idLabel: 'Client ID',
+    secretLabel: 'Client Secret',
+    idKey: 'GOOGLE_CLIENT_ID',
+    secretKey: 'GOOGLE_CLIENT_SECRET',
+  },
+  facebook: {
+    icon: '🔵',
+    title: 'Setup Facebook Login',
+    sub: `Get credentials from <a href="https://developers.facebook.com/apps/" target="_blank">Facebook Developers →</a><br>
+          1. Create App → Consumer type<br>
+          2. Add Facebook Login product<br>
+          3. Set Valid OAuth Redirect URI:<br>
+          <code>http://YOUR_PC_IP:5000/auth/facebook/callback</code>`,
+    idLabel: 'App ID',
+    secretLabel: 'App Secret',
+    idKey: 'FACEBOOK_APP_ID',
+    secretKey: 'FACEBOOK_APP_SECRET',
+  },
+};
+
+function showSetupModal(provider) {
+  _currentProvider = provider;
+  const info = PROVIDER_INFO[provider];
+  document.getElementById('modal-provider-icon').textContent = info.icon;
+  document.getElementById('modal-title').textContent = info.title;
+  document.getElementById('modal-sub').innerHTML = info.sub;
+  document.getElementById('label-id').textContent = info.idLabel;
+  document.getElementById('label-secret').textContent = info.secretLabel;
+  document.getElementById('oauth-cid').value = '';
+  document.getElementById('oauth-csec').value = '';
+  const res = document.getElementById('modal-result');
+  res.className = 'modal-result'; res.style.display = 'none';
+  document.getElementById('setupModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('setupModal').classList.remove('open');
+}
+
+// Close modal on backdrop click
+document.getElementById('setupModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+async function saveOAuth() {
+  const info = PROVIDER_INFO[_currentProvider];
+  const cid  = document.getElementById('oauth-cid').value.trim();
+  const csec = document.getElementById('oauth-csec').value.trim();
+  if (!cid || !csec) {
+    showModalResult('Please enter both credentials', false); return;
+  }
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+
+  try {
+    const body = {};
+    body[info.idKey]     = cid;
+    body[info.secretKey] = csec;
+    const r = await fetch('/api/oauth-save', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    if (d.ok) {
+      showModalResult('✅ Saved! Connecting to ' + (_currentProvider === 'google' ? 'Google' : 'Facebook') + '...', true);
+      // Immediately start the OAuth login flow — no restart needed
+      setTimeout(() => {
+        window.location.href = '/auth/' + _currentProvider;
+      }, 1200);
+    } else {
+      showModalResult('❌ ' + (d.msg || 'Save failed'), false);
+      btn.disabled = false; btn.textContent = '💾 Save & Apply';
+    }
+  } catch(e) {
+    showModalResult('Connection error', false);
+    btn.disabled = false; btn.textContent = '💾 Save & Apply';
+  }
+}
+
+function showModalResult(msg, ok) {
+  const el = document.getElementById('modal-result');
+  el.textContent = msg;
+  el.className = 'modal-result ' + (ok ? 'ok' : 'err');
+  el.style.display = 'block';
+}
+
+// Enter key support
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (document.getElementById('sec-signin').classList.contains('active')) doLogin();
+  else doRegister();
+});
+</script>
+</body>
+</html>

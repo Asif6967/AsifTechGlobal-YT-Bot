@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>YT Bot Panel</title>
+<link rel="manifest" href="/static/manifest.json">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/static/sw.js')}</script>
+<style>
+:root {
+  --bg:      #0d1117;
+  --bg2:     #161b22;
+  --border:  #21262d;
+  --border2: #30363d;
+  --text:    #e6edf3;
+  --muted:   #8b949e;
+  --green:   #00ff88;
+  --green2:  #238636;
+  --red:     #da3633;
+  --red2:    #f85149;
+  --blue:    #1f6feb;
+  --yellow:  #e3b341;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;overflow-x:hidden}
+body{padding-bottom:70px}
+
+/* ── Header ── */
+.header{
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:13px 16px;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:200;
+}
+.header-title{font-size:17px;font-weight:700;color:var(--green);letter-spacing:.5px}
+.header-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:background .3s,box-shadow .3s}
+.dot.on{background:#3fb950;box-shadow:0 0 8px #3fb95088}
+.dot.off{background:var(--red2)}
+
+/* ── Bottom nav ── */
+.bnav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--bg2);border-top:1px solid var(--border);
+  display:flex;z-index:200;
+  padding-bottom:env(safe-area-inset-bottom,0);
+}
+.bnav-btn{
+  flex:1;padding:10px 2px 8px;background:none;border:none;
+  color:var(--muted);font-size:9.5px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  transition:color .2s;
+}
+.bnav-btn.active{color:var(--green)}
+.bnav-btn svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Pages ── */
+.page{display:none;padding:14px 14px 4px;animation:fadeIn .15s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ── Cards ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px}
+.card-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.9px;margin-bottom:12px;font-weight:600}
+
+/* ── Stats ── */
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.stat-num{font-size:26px;font-weight:700;color:var(--green);line-height:1}
+.stat-label{font-size:10px;color:var(--muted);margin-top:5px}
+
+/* ── Big button ── */
+.big-btn{
+  width:100%;padding:15px;border:none;border-radius:10px;
+  font-size:15px;font-weight:700;cursor:pointer;
+  letter-spacing:.5px;transition:opacity .15s,transform .1s;
+}
+.big-btn:active{transform:scale(.98);opacity:.88}
+.btn-start{background:var(--green2);color:#fff}
+.btn-stop{background:var(--red);color:#fff}
+.btn-disabled{background:var(--border2);color:var(--muted);cursor:not-allowed}
+
+/* ── Status bar ── */
+.status-bar{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 0 14px;border-bottom:1px solid var(--border);margin-bottom:14px;
+}
+.status-txt{font-size:15px;font-weight:600}
+
+/* ── List items (OLD kept for compat) ── */
+.list-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:8px}
+.list-item:last-child{border-bottom:none}
+.item-text{font-size:12.5px;color:#c9d1d9;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.del-btn{background:transparent;border:1px solid var(--border2);color:var(--red2);padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;flex-shrink:0}
+.empty{text-align:center;color:var(--muted);padding:28px 0;font-size:13px}
+
+/* ── PREMIUM ITEM CARDS ── */
+.pcard{
+  background:var(--bg);border:1px solid var(--border2);
+  border-radius:10px;margin-bottom:9px;overflow:hidden;
+  transition:border-color .2s,box-shadow .2s;
+  animation:cardIn .2s ease;
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.pcard:hover{border-color:var(--border);box-shadow:0 2px 12px #0004}
+.pcard-body{display:flex;align-items:flex-start;gap:10px;padding:12px 12px 8px}
+.pcard-num{
+  width:22px;height:22px;border-radius:50%;background:var(--border2);
+  color:var(--muted);font-size:10px;font-weight:700;display:flex;
+  align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+}
+.pcard-content{flex:1;min-width:0}
+.pcard-text{
+  font-size:13px;color:var(--text);word-break:break-all;
+  line-height:1.5;
+}
+.pcard-text.url{color:#79c0ff;font-size:12px}
+.pcard-meta{font-size:10px;color:var(--muted);margin-top:3px}
+.pcard-footer{
+  display:flex;gap:6px;padding:6px 12px 10px;
+  border-top:1px solid var(--border);background:var(--bg2);
+  align-items:center;
+}
+.pcard-footer .spacer{flex:1}
+/* Action buttons */
+.act-btn{
+  border:none;border-radius:6px;padding:5px 10px;font-size:11px;
+  font-weight:600;cursor:pointer;display:flex;align-items:center;
+  gap:4px;transition:background .15s,color .15s;
+}
+.act-copy{background:var(--border2);color:var(--muted)}
+.act-copy:active{background:var(--blue);color:#fff}
+.act-edit{background:var(--border2);color:var(--muted)}
+.act-edit:active{background:var(--blue);color:#fff}
+.act-del{background:var(--border2);color:var(--red2)}
+.act-del.confirm{background:var(--red);color:#fff;animation:pulse .4s ease}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+/* Inline edit textarea */
+.inline-edit{
+  width:100%;background:var(--bg);border:1px solid var(--blue);
+  color:var(--text);border-radius:6px;padding:8px;font-size:13px;
+  resize:vertical;outline:none;margin-top:6px;min-height:60px;
+}
+/* Section header */
+.sec-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;
+}
+.sec-hdr-left{display:flex;align-items:center;gap:8px}
+.sec-title{font-size:13px;font-weight:700;color:var(--text)}
+.count-badge{
+  background:var(--green2);color:#fff;border-radius:20px;
+  padding:1px 9px;font-size:11px;font-weight:700;
+}
+/* Add panel */
+.add-panel{
+  background:var(--bg);border:1px solid var(--border2);
+  border-radius:10px;padding:14px;margin-top:4px;
+}
+.add-panel-title{font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600}
+
+/* ── Input row ── */
+.input-row{display:flex;gap:8px;margin-top:12px}
+.txt-in{flex:1;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:10px 12px;border-radius:8px;font-size:14px;outline:none;min-width:0}
+.txt-in:focus{border-color:var(--green)}
+.add-btn{background:var(--green2);border:none;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;flex-shrink:0}
+.add-btn:active{opacity:.8}
+
+/* ── Config rows ── */
+.cfg-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border)}
+.cfg-row:last-of-type{border-bottom:none}
+.cfg-label{font-size:14px;color:#c9d1d9}
+.cfg-in{width:75px;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:6px 8px;border-radius:6px;font-size:14px;text-align:center;outline:none}
+.cfg-in:focus{border-color:var(--green)}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{display:none}
+.tslider{position:absolute;top:0;left:0;right:0;bottom:0;background:var(--border2);border-radius:24px;cursor:pointer;transition:.25s}
+.tslider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:var(--muted);border-radius:50%;transition:.25s}
+.toggle input:checked+.tslider{background:var(--green2)}
+.toggle input:checked+.tslider::before{transform:translateX(20px);background:#fff}
+.save-btn{width:100%;padding:13px;background:var(--blue);border:none;color:#fff;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-top:14px}
+.save-btn:active{opacity:.85}
+
+/* ── Log box ── */
+.log-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.log-toolbar span{font-size:12px;color:var(--muted)}
+.log-clear-btn{background:var(--bg2);border:1px solid var(--border);color:var(--muted);padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer}
+.log-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;height:calc(100vh - 200px);overflow-y:auto;font-family:'Courier New',Courier,monospace;font-size:11px;line-height:1.7}
+.log-line{color:var(--muted);word-break:break-all}
+.log-line.info{color:#3fb950}
+.log-line.warn{color:var(--yellow)}
+.log-line.error{color:var(--red2)}
+.log-line.sent{color:#79c0ff}
+
+/* ── Toast ── */
+.toast{position:fixed;top:68px;left:50%;transform:translateX(-50%);padding:9px 20px;border-radius:20px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+.toast.ok{background:#238636;color:#fff}
+.toast.err{background:var(--red);color:#fff}
+
+/* ── Quick info ── */
+.info-grid{display:grid;gap:6px}
+.info-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);padding:3px 0}
+.info-row span:first-child{width:14px;text-align:center}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-title">⚡ YT Bot Panel</div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="header-status">
+      <div class="dot" id="hDot"></div>
+      <span id="hStatus">Loading...</span>
+    </div>
+    <!-- Notification Bell -->
+    <button id="notifBtn" onclick="toggleNotifications()" title="Enable Notifications"
+      style="background:var(--border);border:1px solid var(--border2);border-radius:20px;padding:5px 11px;cursor:pointer;display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)">
+      <span id="notifIcon">🔔</span>
+      <span id="notifLabel">Notify</span>
+    </button>
+    <a href="/logout" id="userBadge" style="display:flex;align-items:center;gap:6px;text-decoration:none;background:var(--border);border:1px solid var(--border2);border-radius:20px;padding:4px 10px 4px 5px;">
+      <img id="userAvatar" src="" style="width:22px;height:22px;border-radius:50%;display:none;" alt="">
+      <span id="userName" style="font-size:11px;color:var(--muted)">...</span>
+    </a>
+  </div>
+</div>
+
+<!-- ════════ DASHBOARD ════════ -->
+<div class="page active" id="page-dashboard">
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="sUrls">—</div><div class="stat-label">URLs</div></div>
+    <div class="stat"><div class="stat-num" id="sMsgs">—</div><div class="stat-label">Messages</div></div>
+    <div class="stat"><div class="stat-num" id="sTabs">—</div><div class="stat-label">Max Tabs</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Bot Control</div>
+    <div class="status-bar">
+      <div class="dot" id="sDot"></div>
+      <span class="status-txt" id="sText">Checking...</span>
+    </div>
+    <button class="big-btn btn-disabled" id="mainBtn" onclick="toggleBot()">⟳ Loading...</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Files</div>
+    <div class="info-grid">
+      <div class="info-row"><span>⚙️</span><span>config.json — settings</span></div>
+      <div class="info-row"><span>🔗</span><span>urls.txt — YouTube live URLs</span></div>
+      <div class="info-row"><span>💬</span><span>messages.txt — chat messages</span></div>
+      <div class="info-row"><span>📋</span><span>send_log.txt — activity log</span></div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#238636">
+    <div class="card-title" style="color:#00ff88">📱 Android App Download</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Same WiFi pe phone se scan karo ya link kholao</div>
+    <div id="qrBox" style="text-align:center;margin-bottom:12px">
+      <img id="qrImg" src="" style="border-radius:8px;background:#fff;padding:8px;width:140px;height:140px" alt="QR Loading...">
+    </div>
+    <a href="/download" target="_blank"
+      style="display:block;background:#238636;color:#fff;text-decoration:none;padding:12px;border-radius:8px;text-align:center;font-size:14px;font-weight:700">
+      ⬇ Android Download Page Kholain
+    </a>
+  </div>
+</div>
+
+<!-- ════════ URLS ════════ -->
+<div class="page" id="page-urls">
+  <div class="card">
+    <div class="sec-hdr">
+      <div class="sec-hdr-left">
+        <span class="sec-title">🔗 YouTube Live URLs</span>
+        <span class="count-badge" id="urlCountBadge">0</span>
+      </div>
+    </div>
+    <div id="urlList"><div class="empty">Loading...</div></div>
+  </div>
+  <div class="add-panel">
+    <div class="add-panel-title">➕ ADD NEW URL</div>
+    <div style="display:flex;gap:8px">
+      <input class="txt-in" id="urlIn" type="url" placeholder="https://youtube.com/watch?v=...">
+      <button class="add-btn" onclick="addUrl()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ MESSAGES ════════ -->
+<div class="page" id="page-messages">
+  <div class="card">
+    <div class="sec-hdr">
+      <div class="sec-hdr-left">
+        <span class="sec-title">💬 Chat Messages</span>
+        <span class="count-badge" id="msgCountBadge">0</span>
+      </div>
+    </div>
+    <div id="msgList"><div class="empty">Loading...</div></div>
+  </div>
+  <div class="add-panel">
+    <div class="add-panel-title">➕ ADD NEW MESSAGE</div>
+    <textarea class="txt-in" id="msgIn" rows="3" placeholder="Type your chat message here..." style="resize:vertical"></textarea>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <span id="msgCharCount" style="font-size:11px;color:var(--muted)">0 chars</span>
+      <button class="add-btn" onclick="addMsg()">Add Message</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ SETTINGS ════════ -->
+<div class="page" id="page-settings">
+  <div class="card">
+    <div class="card-title">Bot Settings</div>
+
+    <div class="cfg-row">
+      <span class="cfg-label">Max Tabs</span>
+      <input class="cfg-in" type="number" id="c_MAX_TABS" min="1" max="20">
+    </div>
+    <div class="cfg-row">
+      <span class="cfg-label">Min Delay (sec)</span>
+      <input class="cfg-in" type="number" id="c_MIN_DELAY" min="1">
+    </div>
+    <div class="cfg-row">
+      <span class="cfg-label">Max Delay (sec)</span>
+      <input class="cfg-in" type="number" id="c_MAX_DELAY" min="1">
+    </div>
+    <div class="cfg-row">
+      <span class="cfg-label">Batch Sleep (sec)</span>
+      <input class="cfg-in" type="number" id="c_BATCH_SLEEP" min="1">
+    </div>
+    <div class="cfg-row">
+      <span class="cfg-label">Random Delay</span>
+      <label class="toggle"><input type="checkbox" id="c_RANDOM_DELAY"><span class="tslider"></span></label>
+    </div>
+    <div class="cfg-row">
+      <span class="cfg-label">Human Scroll</span>
+      <label class="toggle"><input type="checkbox" id="c_HUMAN_SCROLL"><span class="tslider"></span></label>
+    </div>
+    <div class="cfg-row">
+      <span class="cfg-label">Mouse Emulation</span>
+      <label class="toggle"><input type="checkbox" id="c_MOUSE_MOVE"><span class="tslider"></span></label>
+    </div>
+    <div class="cfg-row">
+      <span class="cfg-label">Headless Mode</span>
+      <label class="toggle"><input type="checkbox" id="c_HEADLESS"><span class="tslider"></span></label>
+    </div>
+    <div class="cfg-row">
+      <span class="cfg-label">Allow Duplicate Msgs</span>
+      <label class="toggle"><input type="checkbox" id="c_ALLOW_DUP"><span class="tslider"></span></label>
+    </div>
+
+    <button class="save-btn" onclick="saveConfig()">💾 Save Settings</button>
+  </div>
+
+  <!-- ── YouTube Cookies (Mobile / No-Chrome Mode) ── -->
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">📱 YouTube Cookies <span style="background:#238636;color:#fff;border-radius:4px;padding:1px 6px;font-size:9px;margin-left:6px">MOBILE MODE</span></div>
+
+    <div id="cookieStatus" style="display:flex;align-items:center;gap:8px;padding:10px 0 12px;border-bottom:1px solid var(--border);margin-bottom:12px">
+      <div class="dot" id="cookieDot" style="width:9px;height:9px;border-radius:50%;background:var(--border2)"></div>
+      <span id="cookieStatusTxt" style="font-size:13px;color:var(--muted)">Checking...</span>
+    </div>
+
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6">
+      <b style="color:var(--text)">Cookies kaise lein (Android):</b><br>
+      1. Firefox install karo<br>
+      2. <b>"Cookie Editor"</b> add-on lagao<br>
+      3. YouTube.com kholain → Login karo<br>
+      4. Cookie Editor → <b>Export → Header String</b> → Copy<br>
+      5. Neeche paste karo → Save karo
+    </div>
+
+    <textarea id="cookieInput" class="txt-in"
+      rows="4" style="resize:vertical;font-size:11px;font-family:monospace"
+      placeholder="SID=xxxxx; HSID=xxxxx; SSID=xxxxx; SAPISID=xxxxx; ..."></textarea>
+
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="save-btn" style="flex:1;padding:11px;font-size:13px" onclick="saveCookies()">💾 Save Cookies</button>
+      <button onclick="clearCookies()" style="background:var(--red);border:none;color:#fff;border-radius:8px;padding:11px 14px;font-size:13px;cursor:pointer;font-weight:600">🗑</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ LOGS ════════ -->
+<div class="page" id="page-logs">
+  <div class="log-toolbar">
+    <span id="logStatus">● Live</span>
+    <button class="log-clear-btn" onclick="clearLogs()">Clear</button>
+  </div>
+  <div class="log-box" id="logBox">
+    <div class="log-line" style="color:var(--muted)">Connecting to log stream...</div>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<nav class="bnav">
+  <button class="bnav-btn active" id="nav-dashboard" onclick="showPage('dashboard')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+    Dashboard
+  </button>
+  <button class="bnav-btn" id="nav-urls" onclick="showPage('urls')">
+    <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+    URLs
+  </button>
+  <button class="bnav-btn" id="nav-messages" onclick="showPage('messages')">
+    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Messages
+  </button>
+  <button class="bnav-btn" id="nav-settings" onclick="showPage('settings')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Settings
+  </button>
+  <button class="bnav-btn" id="nav-logs" onclick="showPage('logs')">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    Logs
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+let botRunning  = false;
+let sseSource   = null;
+let currentPage = 'dashboard';
+let cfgCache    = {};
+
+// Load user info
+fetch('/api/me').then(r=>r.json()).then(u=>{
+  document.getElementById('userName').textContent = u.name || u.email;
+  if (u.avatar) {
+    const img = document.getElementById('userAvatar');
+    img.src = u.avatar; img.style.display = 'block';
+  }
+}).catch(()=>{});
+
+// QR code for Android download
+(function(){
+  const ip = location.hostname;
+  const url = `http://${ip}:5000/download/android`;
+  const qr  = document.getElementById('qrImg');
+  if(qr) qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(url)}`;
+})();
+
+// ─── Push Notifications ──────────────────────────────────────────────────────
+let notifEnabled = Notification?.permission === 'granted';
+
+function updateNotifBtn() {
+  const icon  = document.getElementById('notifIcon');
+  const label = document.getElementById('notifLabel');
+  const btn   = document.getElementById('notifBtn');
+  if (!('Notification' in window)) {
+    btn.style.display = 'none'; return;
+  }
+  if (notifEnabled) {
+    icon.textContent  = '🔔'; label.textContent = 'On';
+    btn.style.background = 'var(--green2)';
+    btn.style.color      = '#fff';
+    btn.style.borderColor = 'var(--green2)';
+  } else {
+    icon.textContent  = '🔕'; label.textContent = 'Notify';
+    btn.style.background  = 'var(--border)';
+    btn.style.color       = 'var(--muted)';
+    btn.style.borderColor = 'var(--border2)';
+  }
+}
+
+async function toggleNotifications() {
+  if (!('Notification' in window)) { alert('Notifications not supported'); return; }
+  if (notifEnabled) {
+    notifEnabled = false; updateNotifBtn();
+    toast('Notifications off'); return;
+  }
+  const perm = await Notification.requestPermission();
+  notifEnabled = perm === 'granted';
+  updateNotifBtn();
+  if (notifEnabled) {
+    toast('✅ Notifications enabled!');
+    sendNotif('🔔 AsifTechGlobal', 'Notifications are now ON! You will be alerted on bot events.');
+  } else {
+    toast('Notification permission denied', 'err');
+  }
+}
+
+function sendNotif(title, body, tag = '') {
+  if (!notifEnabled || Notification.permission !== 'granted') return;
+  try {
+    new Notification(title, {
+      body,
+      tag: tag || title,
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="%23238636"/><text y=".9em" x="50%" text-anchor="middle" font-size="60" fill="white">\u26A1</text></svg>',
+      silent: false,
+      requireInteraction: false,
+    });
+  } catch(e) {}
+}
+
+updateNotifBtn();
+
+// ─── Page navigation ─────────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  currentPage = name;
+  if (name === 'urls')     loadUrls();
+  if (name === 'messages') loadMsgs();
+  if (name === 'settings') { loadConfig(); loadCookieStatus(); }
+  if (name === 'logs')     startSSE();
+}
+
+// ─── Toast ───────────────────────────────────────────────────────────────────
+let toastTimer = null;
+function toast(msg, type = 'ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ─── Status polling ──────────────────────────────────────────────────────────
+function updateStatus(running) {
+  botRunning = running;
+  const dot   = document.getElementById('sDot');
+  const hDot  = document.getElementById('hDot');
+  const txt   = document.getElementById('sText');
+  const hTxt  = document.getElementById('hStatus');
+  const btn   = document.getElementById('mainBtn');
+
+  dot.className  = 'dot ' + (running ? 'on' : 'off');
+  hDot.className = 'dot ' + (running ? 'on' : 'off');
+  txt.textContent  = running ? 'Bot is Running' : 'Bot is Stopped';
+  hTxt.textContent = running ? 'Running' : 'Stopped';
+  txt.style.color  = running ? '#3fb950' : '#f85149';
+
+  btn.className   = 'big-btn ' + (running ? 'btn-stop' : 'btn-start');
+  btn.textContent = running ? '⏹ Stop Bot' : '▶ Start Bot';
+}
+
+async function pollStatus() {
+  try {
+    const r = await fetch('/api/status');
+    const d = await r.json();
+    updateStatus(d.running);
+  } catch(e) {}
+}
+
+// Poll every 3 seconds
+pollStatus();
+setInterval(pollStatus, 3000);
+
+// ─── Dashboard stats ─────────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const [ur, mr, cr] = await Promise.all([
+      fetch('/api/urls').then(r=>r.json()),
+      fetch('/api/messages').then(r=>r.json()),
+      fetch('/api/config').then(r=>r.json()),
+    ]);
+    document.getElementById('sUrls').textContent = ur.length;
+    document.getElementById('sMsgs').textContent = mr.length;
+    document.getElementById('sTabs').textContent = cr.MAX_TABS || '—';
+  } catch(e) {}
+}
+loadStats();
+setInterval(loadStats, 10000);
+
+// ─── Toggle bot ──────────────────────────────────────────────────────────────
+async function toggleBot() {
+  const btn = document.getElementById('mainBtn');
+  btn.disabled = true;
+  try {
+    const action = botRunning ? 'stop' : 'start';
+    const r = await fetch('/api/' + action, {method:'POST'});
+    const d = await r.json();
+    if (d.ok) {
+      toast(d.msg, 'ok');
+      await pollStatus();
+    } else {
+      toast(d.msg, 'err');
+    }
+  } catch(e) {
+    toast('Connection error', 'err');
+  }
+  btn.disabled = false;
+}
+
+// ─── URLs ────────────────────────────────────────────────────────────────────
+const _delTimers = {};
+
+async function loadUrls() {
+  const el = document.getElementById('urlList');
+  el.innerHTML = '<div class="empty">Loading...</div>';
+  try {
+    const urls = await fetch('/api/urls').then(r => r.json());
+    document.getElementById('urlCountBadge').textContent = urls.length;
+    if (!urls.length) {
+      el.innerHTML = '<div class="empty">No URLs added yet.<br><small>Add a YouTube Live stream URL below.</small></div>';
+      return;
+    }
+    el.innerHTML = urls.map((u, i) => `
+      <div class="pcard" id="url-card-${i}">
+        <div class="pcard-body">
+          <div class="pcard-num">${i + 1}</div>
+          <div class="pcard-content">
+            <div class="pcard-text url">${esc(u)}</div>
+            <div class="pcard-meta">YouTube Live Stream</div>
+          </div>
+        </div>
+        <div class="pcard-footer">
+          <button class="act-btn act-copy"
+            data-val="${esc(u)}"
+            onclick="copyText(this.dataset.val,this)">📋 Copy</button>
+          <button class="act-btn act-edit"
+            data-idx="${i}" data-val="${esc(u)}"
+            onclick="openUrlEdit(parseInt(this.dataset.idx),this.dataset.val)">✏️ Edit</button>
+          <div class="spacer"></div>
+          <button class="act-btn act-del" id="del-url-${i}"
+            data-idx="${i}" data-val="${esc(u)}"
+            onclick="confirmDel('url',this.dataset.val,parseInt(this.dataset.idx),this)">🗑️ Delete</button>
+        </div>
+        <div id="url-edit-${i}" style="display:none;padding:10px 12px 12px">
+          <input class="txt-in inline-edit" style="height:40px;resize:none"
+            id="url-edit-in-${i}" value="${esc(u)}" type="url">
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="act-btn" style="background:var(--blue);color:#fff;flex:1"
+              data-idx="${i}" data-val="${esc(u)}"
+              onclick="saveUrlEdit(parseInt(this.dataset.idx),this.dataset.val)">✅ Save</button>
+            <button class="act-btn act-copy"
+              onclick="closeEdit('url',${i})">✕ Cancel</button>
+          </div>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="empty" style="color:var(--red2)">Failed to load. Check connection.</div>';
+  }
+}
+
+async function addUrl() {
+  const inp = document.getElementById('urlIn');
+  const url = inp.value.trim();
+  if (!url) { toast('Enter a YouTube URL', 'err'); return; }
+  if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
+    toast('❌ Not a YouTube URL', 'err'); return;
+  }
+  const r = await fetch('/api/urls', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});
+  const d = await r.json();
+  if (d.ok) { inp.value = ''; toast('✅ URL added!'); loadUrls(); loadStats(); }
+  else toast(d.msg || 'Error adding URL', 'err');
+}
+
+// ── Double-tap delete (works for both URLs and Messages) ──────────────────────
+function confirmDel(type, value, idx, btn) {
+  const key = type + '-' + idx;
+  if (_delTimers[key]) {
+    clearTimeout(_delTimers[key]);
+    delete _delTimers[key];
+    if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+    if (type === 'url') execDelUrl(value);
+    else execDelMsg(value);
+  } else {
+    if (btn) {
+      btn.classList.add('confirm');
+      btn.textContent = '⚠️ Confirm?';
+    }
+    _delTimers[key] = setTimeout(() => {
+      delete _delTimers[key];
+      if (btn && document.contains(btn)) {
+        btn.classList.remove('confirm');
+        btn.textContent = '🗑️ Delete';
+        btn.disabled = false;
+      }
+    }, 3000);
+  }
+}
+
+async function execDelUrl(url) {
+  try {
+    const r = await fetch('/api/urls', {
+      method: 'DELETE',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({url: url.trim()})
+    });
+    const d = await r.json();
+    if (d.ok) { toast('🗑️ URL deleted'); loadUrls(); loadStats(); }
+    else { toast(d.msg || 'Delete failed', 'err'); loadUrls(); }
+  } catch(e) { toast('Connection error', 'err'); loadUrls(); }
+}
+
+function openUrlEdit(idx, url) {
+  const el = document.getElementById('url-edit-' + idx);
+  if (el) { el.style.display = 'block'; }
+  const inp = document.getElementById('url-edit-in-' + idx);
+  if (inp) { inp.value = url; inp.focus(); inp.setSelectionRange(0, inp.value.length); }
+}
+function closeEdit(type, idx) {
+  const el = document.getElementById(type + '-edit-' + idx);
+  if (el) el.style.display = 'none';
+}
+async function saveUrlEdit(idx, oldUrl) {
+  const inp = document.getElementById('url-edit-in-' + idx);
+  const newUrl = inp ? inp.value.trim() : '';
+  if (!newUrl || newUrl === oldUrl) { closeEdit('url', idx); return; }
+  await execDelUrl(oldUrl);
+  const r = await fetch('/api/urls', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:newUrl})});
+  const d = await r.json();
+  if (d.ok) { toast('✅ URL updated'); loadUrls(); }
+  else toast(d.msg || 'Update failed', 'err');
+}
+
+document.getElementById('urlIn').addEventListener('keydown', e => { if (e.key === 'Enter') addUrl(); });
+
+// ─── Messages ────────────────────────────────────────────────────────────────
+async function loadMsgs() {
+  const el = document.getElementById('msgList');
+  el.innerHTML = '<div class="empty">Loading...</div>';
+  try {
+    const msgs = await fetch('/api/messages').then(r => r.json());
+    document.getElementById('msgCountBadge').textContent = msgs.length;
+    if (!msgs.length) {
+      el.innerHTML = '<div class="empty">No messages added yet.<br><small>Add chat messages below.</small></div>';
+      return;
+    }
+    el.innerHTML = msgs.map((m, i) => `
+      <div class="pcard" id="msg-card-${i}">
+        <div class="pcard-body">
+          <div class="pcard-num">${i + 1}</div>
+          <div class="pcard-content">
+            <div class="pcard-text">${esc(m)}</div>
+            <div class="pcard-meta">${m.length} characters</div>
+          </div>
+        </div>
+        <div class="pcard-footer">
+          <button class="act-btn act-copy"
+            data-val="${esc(m)}"
+            onclick="copyText(this.dataset.val,this)">📋 Copy</button>
+          <button class="act-btn act-edit"
+            data-idx="${i}" data-val="${esc(m)}"
+            onclick="openMsgEdit(parseInt(this.dataset.idx),this.dataset.val)">✏️ Edit</button>
+          <div class="spacer"></div>
+          <button class="act-btn act-del" id="del-msg-${i}"
+            data-idx="${i}" data-val="${esc(m)}"
+            onclick="confirmDel('msg',this.dataset.val,parseInt(this.dataset.idx),this)">🗑️ Delete</button>
+        </div>
+        <div id="msg-edit-${i}" style="display:none;padding:10px 12px 12px">
+          <textarea class="txt-in inline-edit" id="msg-edit-in-${i}">${esc(m)}</textarea>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="act-btn" style="background:var(--blue);color:#fff;flex:1"
+              data-idx="${i}" data-val="${esc(m)}"
+              onclick="saveMsgEdit(parseInt(this.dataset.idx),this.dataset.val)">✅ Save</button>
+            <button class="act-btn act-copy"
+              onclick="closeEdit('msg',${i})">✕ Cancel</button>
+          </div>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="empty" style="color:var(--red2)">Failed to load.</div>';
+  }
+}
+
+async function addMsg() {
+  const inp = document.getElementById('msgIn');
+  const message = inp.value.trim();
+  if (!message) { toast('Enter a message', 'err'); return; }
+  const r = await fetch('/api/messages', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})});
+  const d = await r.json();
+  if (d.ok) {
+    inp.value = '';
+    document.getElementById('msgCharCount').textContent = '0 chars';
+    toast('✅ Message added!'); loadMsgs(); loadStats();
+  } else toast(d.msg || 'Error', 'err');
+}
+
+async function execDelMsg(message) {
+  try {
+    const r = await fetch('/api/messages', {
+      method: 'DELETE',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message: message.trim()})
+    });
+    const d = await r.json();
+    if (d.ok) { toast('🗑️ Message deleted'); loadMsgs(); loadStats(); }
+    else { toast(d.msg || 'Delete failed', 'err'); loadMsgs(); }
+  } catch(e) { toast('Connection error', 'err'); loadMsgs(); }
+}
+
+function openMsgEdit(idx, msg) {
+  const el = document.getElementById('msg-edit-' + idx);
+  if (el) el.style.display = 'block';
+  const ta = document.getElementById('msg-edit-in-' + idx);
+  if (ta) { ta.value = msg; ta.focus(); }
+}
+async function saveMsgEdit(idx, oldMsg) {
+  const ta = document.getElementById('msg-edit-in-' + idx);
+  const newMsg = ta ? ta.value.trim() : '';
+  if (!newMsg || newMsg === oldMsg) { closeEdit('msg', idx); return; }
+  await execDelMsg(oldMsg);
+  const r = await fetch('/api/messages', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:newMsg})});
+  const d = await r.json();
+  if (d.ok) { toast('✅ Message updated'); loadMsgs(); }
+  else toast(d.msg || 'Update failed', 'err');
+}
+
+document.getElementById('msgIn').addEventListener('input', function() {
+  document.getElementById('msgCharCount').textContent = this.value.length + ' chars';
+});
+
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✅ Copied!'; btn.style.color = 'var(--green)';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.color = ''; }, 1500);
+  }).catch(() => toast('Copy failed', 'err'));
+}
+
+// ─── Config ──────────────────────────────────────────────────────────────────
+async function loadConfig() {
+  try {
+    const cfg = await fetch('/api/config').then(r=>r.json());
+    cfgCache = cfg;
+    document.getElementById('c_MAX_TABS').value  = cfg.MAX_TABS  ?? 10;
+    document.getElementById('c_MIN_DELAY').value = cfg.MIN_DELAY ?? 3;
+    document.getElementById('c_MAX_DELAY').value = cfg.MAX_DELAY ?? 6;
+    document.getElementById('c_BATCH_SLEEP').value = (cfg.LOOP_SETTINGS||{}).BATCH_SLEEP_DELAY ?? 6;
+    document.getElementById('c_RANDOM_DELAY').checked  = !!cfg.RANDOM_DELAY;
+    document.getElementById('c_HUMAN_SCROLL').checked  = !!(cfg.ANTI_BAN_SETTINGS||{}).HUMAN_SCROLL;
+    document.getElementById('c_MOUSE_MOVE').checked    = !!(cfg.ANTI_BAN_SETTINGS||{}).MOUSE_MOVE_EMULATION;
+    document.getElementById('c_HEADLESS').checked      = !!(cfg.SYSTEM_SETTINGS||{}).HEADLESS_MODE;
+    document.getElementById('c_ALLOW_DUP').checked     = !!(cfg.LOOP_SETTINGS||{}).ALLOW_DUPLICATE_MESSAGES;
+  } catch(e) { toast('Config load failed', 'err'); }
+}
+
+async function saveConfig() {
+  const cfg = JSON.parse(JSON.stringify(cfgCache));
+  cfg.MAX_TABS    = parseInt(document.getElementById('c_MAX_TABS').value)  || 10;
+  cfg.MIN_DELAY   = parseInt(document.getElementById('c_MIN_DELAY').value) || 3;
+  cfg.MAX_DELAY   = parseInt(document.getElementById('c_MAX_DELAY').value) || 6;
+  cfg.RANDOM_DELAY = document.getElementById('c_RANDOM_DELAY').checked;
+  cfg.ANTI_BAN_SETTINGS = cfg.ANTI_BAN_SETTINGS || {};
+  cfg.ANTI_BAN_SETTINGS.HUMAN_SCROLL        = document.getElementById('c_HUMAN_SCROLL').checked;
+  cfg.ANTI_BAN_SETTINGS.MOUSE_MOVE_EMULATION= document.getElementById('c_MOUSE_MOVE').checked;
+  cfg.SYSTEM_SETTINGS = cfg.SYSTEM_SETTINGS || {};
+  cfg.SYSTEM_SETTINGS.HEADLESS_MODE         = document.getElementById('c_HEADLESS').checked;
+  cfg.LOOP_SETTINGS = cfg.LOOP_SETTINGS || {};
+  cfg.LOOP_SETTINGS.BATCH_SLEEP_DELAY       = parseInt(document.getElementById('c_BATCH_SLEEP').value) || 6;
+  cfg.LOOP_SETTINGS.ALLOW_DUPLICATE_MESSAGES= document.getElementById('c_ALLOW_DUP').checked;
+
+  const r = await fetch('/api/config', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cfg)});
+  const d = await r.json();
+  if (d.ok) { cfgCache = cfg; toast('Settings saved ✓'); loadStats(); }
+  else toast('Save failed', 'err');
+}
+
+// ─── Logs (SSE) ──────────────────────────────────────────────────────────────
+let autoScroll = true;
+
+function startSSE() {
+  if (sseSource) return;
+  const box = document.getElementById('logBox');
+  box.innerHTML = '';
+  sseSource = new EventSource('/api/logs');
+  sseSource.onmessage = e => {
+    if (!e.data.trim()) return;
+    appendLog(e.data);
+    // ── Push Notifications on bot events ──
+    const line = e.data.toLowerCase();
+    if (line.includes('sent on tab') || (line.includes('sent') && line.includes(':'))) {
+      sendNotif('💬 Message Sent', e.data.replace(/\d{2}:\d{2}:\d{2}\s*\|.*?\|\s*/,'').substring(0,80), 'sent');
+    } else if (line.includes('starting chrome') || line.includes('opening') && line.includes('url')) {
+      sendNotif('✅ Bot Started', 'Bot is now running and opening tabs.', 'start');
+    } else if (line.includes('stopped by user') || line.includes('stopped.')) {
+      sendNotif('⏹ Bot Stopped', 'Bot has been stopped.', 'stop');
+    } else if (line.includes('error') || line.includes('crash') || line.includes('failed')) {
+      sendNotif('⚠️ Bot Error', e.data.replace(/\d{2}:\d{2}:\d{2}\s*\|.*?\|\s*/,'').substring(0,80), 'error');
+    } else if (line.includes('round done') || line.includes('batch')) {
+      sendNotif('🔄 Round Complete', 'Bot completed a messaging round.', 'round');
+    }
+  };
+  sseSource.onerror = () => {
+    document.getElementById('logStatus').textContent = '● Reconnecting...';
+    document.getElementById('logStatus').style.color = 'var(--yellow)';
+  };
+  sseSource.onopen = () => {
+    document.getElementById('logStatus').textContent = '● Live';
+    document.getElementById('logStatus').style.color = 'var(--green)';
+  };
+  // Auto-scroll on user scroll
+  box.addEventListener('scroll', () => {
+    autoScroll = box.scrollHeight - box.scrollTop - box.clientHeight < 30;
+  });
+}
+
+function appendLog(line) {
+  const box = document.getElementById('logBox');
+  const div = document.createElement('div');
+  div.className = 'log-line';
+  // Colour-code by content
+  const l = line.toLowerCase();
+  if (l.includes('sent on') || l.includes('sending')) div.classList.add('sent');
+  else if (l.includes('error') || l.includes('crash') || l.includes('failed')) div.classList.add('error');
+  else if (l.includes('warning') || l.includes('warn') || l.includes('waiting')) div.classList.add('warn');
+  else if (l.includes('info') || l.includes('started') || l.includes('opening')) div.classList.add('info');
+  div.textContent = line;
+  box.appendChild(div);
+  // Keep only last 300 lines in DOM
+  while (box.children.length > 300) box.removeChild(box.firstChild);
+  if (autoScroll) box.scrollTop = box.scrollHeight;
+}
+
+function clearLogs() {
+  document.getElementById('logBox').innerHTML = '';
+  toast('Logs cleared');
+}
+
+// ─── YouTube Cookies ─────────────────────────────────────────────────────────
+async function loadCookieStatus() {
+  try {
+    const d = await fetch('/api/cookies').then(r => r.json());
+    const dot = document.getElementById('cookieDot');
+    const txt = document.getElementById('cookieStatusTxt');
+    if (d.has_cookies) {
+      dot.style.background = '#3fb950';
+      dot.style.boxShadow  = '0 0 8px #3fb95088';
+      txt.style.color      = '#3fb950';
+      txt.textContent      = `✓ ${d.count} cookies set (${d.cookie_keys.substring(0,40)}...)`;
+    } else {
+      dot.style.background = '#f85149';
+      dot.style.boxShadow  = 'none';
+      txt.style.color      = '#f85149';
+      txt.textContent      = '✗ Cookies set nahi hain — Mobile bot kaam nahi karega';
+    }
+  } catch(e) {}
+}
+
+async function saveCookies() {
+  const raw = document.getElementById('cookieInput').value.trim();
+  if (!raw) { toast('Cookies paste karo pehle', 'err'); return; }
+  const r = await fetch('/api/cookies', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({cookies: raw})
+  }).then(x => x.json());
+  if (r.ok) {
+    document.getElementById('cookieInput').value = '';
+    toast(r.msg, 'ok');
+    loadCookieStatus();
+  } else {
+    toast(r.msg || 'Error', 'err');
+  }
+}
+
+async function clearCookies() {
+  const r = await fetch('/api/cookies', {
+    method: 'DELETE', headers: {'Content-Type':'application/json'}
+  }).then(x => x.json());
+  if (r.ok) { toast('Cookies clear ho gayi', 'ok'); loadCookieStatus(); }
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

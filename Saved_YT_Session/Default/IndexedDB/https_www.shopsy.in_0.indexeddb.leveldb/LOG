@@ -1,0 +1,6 @@
+2026/06/15-19:30:28.873 4ebc Creating DB E:\yt\Saved_YT_Session\Default\IndexedDB\https_www.shopsy.in_0.indexeddb.leveldb since it was missing.
+2026/06/15-19:30:28.893 4ebc Reusing MANIFEST E:\yt\Saved_YT_Session\Default\IndexedDB\https_www.shopsy.in_0.indexeddb.leveldb/MANIFEST-000001
+2026/06/15-19:30:28.940 14fc Level-0 table #5: started
+2026/06/15-19:30:28.950 14fc Level-0 table #5: 762 bytes OK
+2026/06/15-19:30:28.960 14fc Delete type=0 #3
+2026/06/15-19:30:28.961 14fc Manual compaction at level-0 from '\x00\x01\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x02\x00\x00\x00' @ 0 : 0; will stop at (end)
