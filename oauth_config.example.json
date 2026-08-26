@@ -1,0 +1,6 @@
+{
+    "GOOGLE_CLIENT_ID":     "your-google-client-id.apps.googleusercontent.com",
+    "GOOGLE_CLIENT_SECRET": "your-google-client-secret",
+    "FACEBOOK_APP_ID":      "your-facebook-app-id",
+    "FACEBOOK_APP_SECRET":  "your-facebook-app-secret"
+}

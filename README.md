@@ -1,150 +1,187 @@
 # ⚡ AsifTechGlobal — YT Bot Panel
 
-> YouTube Live Chat Automation Platform — Ultra Premium
+<div align="center">
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square&logo=python)
-![Flask](https://img.shields.io/badge/Flask-Web%20Panel-green?style=flat-square&logo=flask)
-![Platform](https://img.shields.io/badge/Platform-PC%20%7C%20Mobile%20%7C%20iPhone-gold?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-purple?style=flat-square)
+![AsifTechGlobal](https://img.shields.io/badge/AsifTechGlobal-YT%20Bot-f0b429?style=for-the-badge&logo=youtube&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python)
+![Flask](https://img.shields.io/badge/Flask-3.1-green?style=for-the-badge&logo=flask)
+![License](https://img.shields.io/badge/License-MIT-purple?style=for-the-badge)
 
----
+**Ultra Premium YouTube Live Chat Automation Platform**
 
-## 🚀 Features
+*Free: 1200 comments demo | Paid: ₹20 = 20 days unlimited*
 
-- **Multi-user** web panel with Google/Facebook/Email login
-- **YouTube Live Chat** automation — auto send messages
-- **Free Plan** — 1200 comments demo
-- **Paid Plan** — ₹20 = 20 days unlimited
-- **Mobile support** — works on Android (Termux) + iPhone + PC
-- **Ultra Premium UI** — AsifTechGlobal brand design
-- **Admin panel** — manage users, generate activation keys
-- **Push notifications** — browser alerts on bot events
-- **Anti-ban** — human scroll, mouse emulation, random delays
+</div>
 
 ---
 
-## 📦 Installation
+## ✨ Features
 
-### PC (Windows / Linux / Mac)
+- 🤖 **Auto comment** on YouTube Live streams
+- 👥 **Multi-user** — each user gets their own isolated bot
+- 🔐 **Auth** — Email/Password + Google + Facebook OAuth
+- 📱 **Works everywhere** — PC, Mobile, iPhone, Android (Termux)
+- ⚡ **Speed modes** — Slow / Normal / Fast / Turbo / Custom
+- 💰 **Built-in monetization** — Free 1200 comments, then ₹20/20 days
+- 🔑 **Activation key system** — Generate & send keys after payment
+- 🛡️ **Anti-ban** — Human scroll, mouse emulation, random delays
+- 📊 **Live logs** — Real-time SSE log stream
+- 🔔 **Push notifications** — Browser notifications on bot events
+- 🌐 **PWA** — Install as app on mobile
 
+---
+
+## 🚀 Quick Start
+
+### 1. Clone
 ```bash
-# 1. Clone repo
-git clone https://github.com/YOUR_USERNAME/yt-bot-panel.git
-cd yt-bot-panel
+git clone https://github.com/Asif6967/AsifTechGlobal-YT-Bot.git
+cd AsifTechGlobal-YT-Bot
+```
 
-# 2. Install dependencies
+### 2. Install dependencies
+```bash
 pip install -r requirements.txt
+```
 
-# 3. Run
+### 3. Setup config
+```bash
+# Copy example config
+copy config.example.json config.json
+
+# Optional: Setup Google/Facebook OAuth
+copy oauth_config.example.json oauth_config.json
+# Edit oauth_config.json with your credentials
+```
+
+### 4. Run
+```bash
 python web_panel.py
 ```
 
-Open browser: `http://localhost:5000`
+### 5. Open in browser
+```
+PC:     http://localhost:5000
+Mobile: http://YOUR_PC_IP:5000
+```
 
 ---
 
-### 📱 Android (Termux)
+## 📱 Android / Termux Setup
 
+1. Install **Termux** from F-Droid
+2. Go to `http://YOUR_PC_IP:5000` on phone → Download Android Package
+3. In Termux:
 ```bash
-# 1. Install Termux from F-Droid
-# 2. Run setup
 termux-setup-storage
-pkg install python git
-git clone https://github.com/YOUR_USERNAME/yt-bot-panel.git
-cd yt-bot-panel
-bash termux_setup.sh
+cp /sdcard/Download/AsifTechGlobal_Android.zip ~/
+cd ~/ && unzip AsifTechGlobal_Android.zip -d bot
+cd bot && bash termux_setup.sh
 python termux_app.py
 ```
 
 ---
 
-## 🌐 Access from Mobile
+## 💰 Monetization System
 
-Same WiFi pe phone se access karo:
+| Plan | Price | Limit |
+|------|-------|-------|
+| **Free** | ₹0 | 1200 comments (lifetime demo) |
+| **Paid** | ₹20 | Unlimited for 20 days |
+
+### How it works:
+1. User hits 1200 comment limit → bot stops automatically
+2. User goes to `/upgrade` page → pays ₹20 via UPI
+3. User sends screenshot on WhatsApp
+4. You verify → generate key from `/admin?key=YOUR_ADMIN_KEY`
+5. User enters key → plan activates instantly
+
+### Admin Panel
 ```
-http://YOUR_PC_IP:5000
+http://localhost:5000/admin?key=atgadmin2024
+```
+> ⚠️ Change `ADMIN_SECRET` in `web_panel.py` before deploying!
+
+---
+
+## ⚙️ Configuration
+
+Edit `config.json` (copy from `config.example.json`):
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `MAX_TABS` | Parallel browser tabs | 5 |
+| `INTERVAL` | Seconds between sends | 15 |
+| `MIN_DELAY` | Min random delay (sec) | 3 |
+| `MAX_DELAY` | Max random delay (sec) | 6 |
+| `SPEED_MODE` | slow/normal/fast/turbo/custom | normal |
+| `HEADLESS_MODE` | Run Chrome hidden | false |
+| `HUMAN_SCROLL` | Anti-ban scroll | true |
+
+---
+
+## 🔐 Google OAuth Setup
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create project → APIs & Services → Credentials
+3. Create OAuth 2.0 Client ID (Web Application)
+4. Add Authorized Redirect URIs:
+   - `http://localhost:5000/auth/google/callback`
+   - `http://YOUR_IP:5000/auth/google/callback`
+5. Copy credentials to `oauth_config.json`
+
+---
+
+## 🛠️ Tech Stack
+
+- **Backend:** Python, Flask, Flask-Login, Authlib
+- **Bot:** Selenium, WebDriver Manager
+- **Database:** SQLite (users, activation keys)
+- **Frontend:** Vanilla HTML/CSS/JS — no framework, ultra-premium design
+- **Mobile:** PWA + Termux Android support
+
+---
+
+## 📁 Project Structure
+
+```
+AsifTechGlobal-YT-Bot/
+├── web_panel.py          # Main Flask app + all API routes
+├── bot.py                # Selenium bot (Chrome/desktop)
+├── bot_mobile.py         # Cookie-based bot (mobile/headless)
+├── bot_headless.py       # Headless variant
+├── browser_utils.py      # Shared browser utilities
+├── templates/
+│   ├── login.html        # Ultra-premium login page
+│   ├── index.html        # Main dashboard (5 pages)
+│   ├── upgrade.html      # Payment/upgrade page
+│   └── admin.html        # Admin panel
+├── static/
+│   ├── manifest.json     # PWA manifest
+│   ├── sw.js             # Service worker
+│   └── icon-192.png      # App icon
+├── config.example.json   # Config template
+├── oauth_config.example.json
+└── requirements.txt
 ```
 
 ---
 
-## 💰 Plans
+## ⚠️ Important Notes
 
-| Plan | Price | Comments | Duration |
-|------|-------|----------|----------|
-| Free | ₹0 | 1,200 | Lifetime |
-| Paid | ₹20 | Unlimited | 20 days |
-
----
-
-## ⚙️ Config
-
-Copy `config.json.example` to `config.json` and edit:
-
-```json
-{
-  "PLATFORM": "youtube",
-  "INTERVAL": 15,
-  "MAX_TABS": 5,
-  "SPEED_MODE": "normal"
-}
-```
+- **Change admin password** before deploying: `ADMIN_SECRET` in `web_panel.py`
+- **Never commit** `oauth_config.json`, `users.db`, `.secret_key`
+- This tool is for **educational purposes** — use responsibly
+- YouTube's Terms of Service prohibit automated interactions
 
 ---
 
-## 🔐 Admin Panel
+## 👨‍💻 Author
 
-```
-http://localhost:5000/admin?key=YOUR_ADMIN_KEY
-```
-
-Set your admin key via environment variable:
-```bash
-set ATG_ADMIN_KEY=your_secret_key
-python web_panel.py
-```
+**AsifTechGlobal** — [GitHub](https://github.com/Asif6967)
 
 ---
 
-## 📋 Requirements
-
-```
-flask
-flask-login
-werkzeug
-authlib
-selenium
-webdriver-manager
-requests
-```
-
----
-
-## 🛡️ Security Notes
-
-- Never commit `oauth_config.json`, `.secret_key`, or `users.db`
-- Change `ATG_ADMIN_KEY` before deploying
-- Use HTTPS in production (behind nginx)
-
----
-
-## 📱 Deploy Free (24/7)
-
-Best free hosting options:
-
-| Platform | Free Tier | Notes |
-|----------|-----------|-------|
-| **Railway** | 500 hrs/mo | Easy deploy |
-| **Render** | 750 hrs/mo | Free PostgreSQL |
-| **Koyeb** | Always free | Good for Flask |
-
----
-
-## 🧑‍💻 Made by
-
-**AsifTechGlobal** — YouTube Automation Tools
-
----
-
-## 📄 License
-
-MIT License — Free to use and modify.
+<div align="center">
+⭐ Star this repo if it helped you!
+</div>
