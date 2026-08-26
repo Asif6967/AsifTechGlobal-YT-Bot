@@ -20,12 +20,22 @@ from authlib.integrations.flask_client import OAuth
 # Support both normal run and PyInstaller .exe bundle
 _app_dir    = os.environ.get("ATG_APP_DIR")
 _bundle_dir = os.environ.get("ATG_BUNDLE_DIR")
-BASE_DIR    = Path(_app_dir)    if _app_dir    else Path(__file__).parent.resolve()
+
+# On cloud (Render/Railway), use /tmp for writable data
+# On local, use the app directory
+_is_cloud = os.environ.get("RENDER") or os.environ.get("RAILWAY_ENVIRONMENT")
+if _is_cloud:
+    _data_dir = Path("/tmp/atg_data")
+    _data_dir.mkdir(parents=True, exist_ok=True)
+else:
+    _data_dir = Path(_app_dir) if _app_dir else Path(__file__).parent.resolve()
+
+BASE_DIR    = Path(_app_dir) if _app_dir else Path(__file__).parent.resolve()
 _TMPL_DIR   = str(Path(_bundle_dir) / "templates") if _bundle_dir else None
 
-DB_FILE     = BASE_DIR / "users.db"
-USER_DATA   = BASE_DIR / "user_data"
-SECRET_FILE = BASE_DIR / ".secret_key"
+DB_FILE     = _data_dir / "users.db"
+USER_DATA   = _data_dir / "user_data"
+SECRET_FILE = _data_dir / ".secret_key"
 OAUTH_FILE  = BASE_DIR / "oauth_config.json"
 
 # ── App & persistent secret key ───────────────────────────────────────────────
