@@ -42,6 +42,13 @@ OAUTH_FILE  = BASE_DIR / "oauth_config.json"
 # Use bundle template folder when frozen (PyInstaller .exe)
 app = Flask(__name__, **(dict(template_folder=_TMPL_DIR) if _TMPL_DIR else {}))
 app.config["JSON_AS_ASCII"] = False
+app.config["PROPAGATE_EXCEPTIONS"] = True
+
+import traceback as _tb
+
+@app.errorhandler(500)
+def handle_500(e):
+    return {"ok": False, "error": str(e), "trace": _tb.format_exc()}, 500
 
 # ── Fix for HTTPS tunnels (serveo, localhost.run, ngrok) ──────────────────────
 app.config["SESSION_COOKIE_SECURE"]   = False   # allow over HTTP tunnel proxy
