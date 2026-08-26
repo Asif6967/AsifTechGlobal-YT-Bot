@@ -1,0 +1,26 @@
+{
+    "PLATFORM": "youtube",
+    "INTERVAL": 15,
+    "RANDOM_DELAY": true,
+    "MIN_DELAY": 3,
+    "MAX_DELAY": 6,
+    "MAX_TABS": 5,
+    "SPEED_MODE": "normal",
+    "SPEED_SETTINGS": {
+        "slow":   {"INTERVAL": 25, "MIN_DELAY": 10, "MAX_DELAY": 20, "BATCH_SLEEP_DELAY": 15},
+        "normal": {"INTERVAL": 15, "MIN_DELAY": 3,  "MAX_DELAY": 6,  "BATCH_SLEEP_DELAY": 6},
+        "fast":   {"INTERVAL": 8,  "MIN_DELAY": 2,  "MAX_DELAY": 4,  "BATCH_SLEEP_DELAY": 3},
+        "turbo":  {"INTERVAL": 4,  "MIN_DELAY": 1,  "MAX_DELAY": 2,  "BATCH_SLEEP_DELAY": 2}
+    },
+    "ANTI_BAN_SETTINGS": {
+        "HUMAN_SCROLL": true,
+        "MOUSE_MOVE_EMULATION": true
+    },
+    "LOOP_SETTINGS": {
+        "BATCH_SLEEP_DELAY": 6,
+        "ALLOW_DUPLICATE_MESSAGES": false
+    },
+    "SYSTEM_SETTINGS": {
+        "HEADLESS_MODE": false
+    }
+}

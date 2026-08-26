@@ -1,0 +1,64 @@
+# ── Python ──────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+
+# ── Virtual Environment ──────────────────────────────────
+.venv/
+venv/
+env/
+
+# ── Secrets (NEVER upload) ───────────────────────────────
+.secret_key
+oauth_config.json
+*.pem
+*.key
+
+# ── Database & User Data ─────────────────────────────────
+users.db
+user_data/
+*.db
+*.db-journal
+
+# ── Logs & Runtime Files ─────────────────────────────────
+*.log
+send_log.txt
+srv_*.log
+server_test.*
+urls.txt
+messages.txt
+*.txt
+!requirements.txt
+
+# ── Browser Session ──────────────────────────────────────
+Saved_YT_Session/
+ChromeProfile/
+selenium_test_profile/
+
+# ── Build / Dist ─────────────────────────────────────────
+dist/
+build/
+*.exe
+*.spec
+*.zip
+
+# ── Config with local secrets ────────────────────────────
+config.json
+
+# ── Node ─────────────────────────────────────────────────
+node_modules/
+package-lock.json
+
+# ── IDE / OS ─────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ── Other ────────────────────────────────────────────────
+Untitled*.txt
+start_*.ps1
+tray_app.py
+tests/

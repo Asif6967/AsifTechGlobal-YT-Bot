@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#02040a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>AsifTechGlobal — YT Bot Panel</title>
+<link rel="manifest" href="/static/manifest.json">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/static/sw.js')}</script>
+<style>
+/* ══════════════════════════════════════
+   ASIFTECHGLOBAL DESIGN SYSTEM
+══════════════════════════════════════ */
+:root{
+  --bg:    #02040a; --bg2:#060c18; --bg3:#0a1228; --bg4:#0d1530;
+  --glass: rgba(6,12,24,0.82);
+  --glass2:rgba(10,18,40,0.92);
+  --b0:rgba(255,255,255,0.04);
+  --b1:rgba(255,255,255,0.08);
+  --b2:rgba(255,255,255,0.13);
+  --b3:rgba(255,255,255,0.20);
+  --tx:#f0f4ff; --tx2:#b8c4e0;
+  --mu:#5a6e8e; --mu2:#8599bb;
+  /* ATG Brand */
+  --gold:  #f0b429; --gold2:#e09b10;
+  --cyan:  #00e5ff; --cyan2:#00b8d9;
+  --green: #00ffaa; --blue: #4f8dff;
+  --pu:    #8b5cf6; --re:   #f85149; --re2:#da3633;
+  --or:    #fb923c; --ye:   #fbbf24;
+  /* ATG Gradients */
+  --atg:  linear-gradient(135deg,#f0b429 0%,#00e5ff 100%);
+  --atg2: linear-gradient(135deg,#f0b429 0%,#fb923c 100%);
+  --atg3: linear-gradient(135deg,#00e5ff 0%,#4f8dff 100%);
+  --atg4: linear-gradient(135deg,#8b5cf6 0%,#4f8dff 100%);
+  /* Shadows */
+  --sh:  0 8px 32px rgba(0,0,0,.5);
+  --shg: 0 0 30px rgba(240,180,41,.10);
+  /* Radius */
+  --r:20px; --rm:16px; --rs:10px; --rxs:7px;
+  /* Layout */
+  --hh:60px; --nh:62px;
+  --ease:cubic-bezier(.4,0,.2,1);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+}
+
+/* ══ RESET ══ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%;-webkit-text-size-adjust:100%}
+body{
+  min-height:100vh;min-height:100dvh;
+  background:var(--bg);color:var(--tx);
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Inter,sans-serif;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  padding-top:var(--hh);
+  padding-bottom:calc(var(--nh) + env(safe-area-inset-bottom,0px));
+}
+
+/* ══ ANIMATED BG ══ */
+#bg{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.bg-base{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 0% 0%,   rgba(240,180,41,.07),transparent 52%),
+    radial-gradient(ellipse 65% 50% at 100% 100%,rgba(0,229,255,.06),transparent 52%),
+    linear-gradient(170deg,#040816,#02040a);
+}
+.orb{position:absolute;border-radius:50%;filter:blur(88px);animation:oF 18s ease-in-out infinite;pointer-events:none}
+.og{width:580px;height:580px;top:-210px;left:-160px;background:radial-gradient(circle,rgba(240,180,41,.12),transparent 62%);animation-duration:20s}
+.oc{width:520px;height:520px;bottom:-190px;right:-150px;background:radial-gradient(circle,rgba(0,229,255,.10),transparent 62%);animation-duration:15s;animation-delay:-8s}
+@keyframes oF{0%,100%{transform:translate(0,0)}40%{transform:translate(24px,-28px)}72%{transform:translate(-16px,20px)}}
+.bg-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(240,180,41,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(240,180,41,.015) 1px,transparent 1px);
+  background-size:62px 62px;
+  mask-image:radial-gradient(ellipse 85% 85% at 50% 50%,#000 8%,transparent 72%);
+  -webkit-mask-image:radial-gradient(ellipse 85% 85% at 50% 50%,#000 8%,transparent 72%);
+}
+
+/* ══════════════════════════════════════
+   HEADER — ATG STYLE
+══════════════════════════════════════ */
+.hdr{
+  position:fixed;top:0;left:0;right:0;z-index:600;
+  height:var(--hh);
+  background:rgba(2,4,10,.90);
+  backdrop-filter:blur(24px) saturate(180%);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
+  border-bottom:1px solid rgba(240,180,41,.10);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;
+  padding-top:env(safe-area-inset-top,0px);
+}
+/* ATG Logo */
+.hdr-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.hdr-hex{
+  width:36px;height:36px;
+  background:var(--atg);
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;flex-shrink:0;
+  box-shadow:0 4px 16px rgba(240,180,41,.28);
+  position:relative;
+}
+.hdr-brand-txt{
+  display:flex;flex-direction:column;
+}
+.hdr-atg{
+  font-size:11px;font-weight:900;letter-spacing:2.5px;
+  color:var(--gold);text-transform:uppercase;line-height:1;
+}
+.hdr-sub{
+  font-size:10px;color:var(--mu2);letter-spacing:.4px;line-height:1.3;margin-top:1px;
+}
+.hdr-right{display:flex;align-items:center;gap:8px}
+
+/* Status pill */
+.spill{
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg3);border:1px solid var(--b1);
+  border-radius:20px;padding:5px 12px;font-size:12px;color:var(--mu2);
+  transition:all .3s;cursor:default;
+}
+.spill.run{border-color:rgba(240,180,41,.28);background:rgba(240,180,41,.07)}
+.spill.run .sdot{background:var(--gold);box-shadow:0 0 8px rgba(240,180,41,.6)}
+.spill.stp .sdot{background:var(--re)}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--mu);transition:all .3s;flex-shrink:0}
+
+/* Notif */
+.nb-btn{
+  background:var(--bg3);border:1px solid var(--b1);
+  border-radius:20px;padding:5px 11px;cursor:pointer;
+  display:flex;align-items:center;gap:5px;
+  font-size:12px;color:var(--mu);transition:all .2s;font-family:inherit;
+}
+.nb-btn:hover{border-color:var(--b2);color:var(--tx)}
+.nb-btn.on{background:rgba(240,180,41,.10);border-color:rgba(240,180,41,.28);color:var(--gold)}
+
+/* User badge */
+.u-badge{
+  display:flex;align-items:center;gap:6px;text-decoration:none;
+  background:var(--bg3);border:1px solid var(--b1);
+  border-radius:20px;padding:4px 10px 4px 5px;transition:all .2s;
+}
+.u-badge:hover{border-color:rgba(240,180,41,.22)}
+.u-badge img{width:24px;height:24px;border-radius:50%;display:none;object-fit:cover}
+.u-badge span{font-size:11.5px;color:var(--mu2)}
+
+/* ══════════════════════════════════════
+   BOTTOM NAV — ATG STYLE
+══════════════════════════════════════ */
+.bnav{
+  position:fixed;bottom:0;left:0;right:0;z-index:600;
+  background:rgba(2,4,10,.92);
+  backdrop-filter:blur(24px) saturate(180%);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
+  border-top:1px solid rgba(240,180,41,.08);
+  display:flex;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  height:calc(var(--nh) + env(safe-area-inset-bottom,0px));
+}
+.nb{
+  flex:1;background:none;border:none;
+  color:var(--mu);font-size:10px;font-weight:600;
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;padding:8px 4px;transition:color .2s;font-family:inherit;
+  position:relative;letter-spacing:.2px;
+}
+.nb.on{color:var(--gold)}
+.nb.on::before{
+  content:'';position:absolute;top:0;left:15%;right:15%;height:2px;
+  background:var(--atg);border-radius:0 0 3px 3px;
+}
+.nb svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.nb.on svg{transform:scale(1.14)}
+.nb-cnt{
+  position:absolute;top:4px;right:calc(50% - 18px);
+  min-width:16px;height:16px;background:var(--re);
+  border-radius:8px;font-size:9px;font-weight:800;color:#fff;
+  display:none;align-items:center;justify-content:center;padding:0 4px;
+}
+.nb-cnt.show{display:flex}
+
+/* ══════════════════════════════════════
+   PAGES
+══════════════════════════════════════ */
+.page{display:none;padding:16px 14px 8px;animation:pgIn .18s var(--ease)}
+.page.on{display:block}
+@keyframes pgIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* Page header */
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ph-l{display:flex;align-items:center;gap:10px}
+.ph-title{font-size:15px;font-weight:800;color:var(--tx)}
+.ph-badge{
+  background:var(--atg);color:#030610;
+  border-radius:20px;padding:1px 10px;
+  font-size:11.5px;font-weight:800;
+}
+
+/* ══════════════════════════════════════
+   CARDS
+══════════════════════════════════════ */
+.card{
+  background:var(--glass);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--b1);border-radius:var(--r);
+  padding:16px;margin-bottom:12px;position:relative;overflow:hidden;
+}
+/* Gold top shimmer */
+.card::before{
+  content:'';position:absolute;top:0;left:8%;right:8%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(240,180,41,.25),rgba(0,229,255,.15),transparent);
+}
+.ctitle{
+  font-size:11px;color:var(--mu2);text-transform:uppercase;
+  letter-spacing:1.1px;margin-bottom:14px;font-weight:700;
+  display:flex;align-items:center;gap:7px;
+}
+.ctitle::before{
+  content:'';width:3px;height:12px;
+  background:var(--atg);border-radius:2px;flex-shrink:0;
+}
+
+/* ══ STAT GRID ══ */
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.scard{
+  background:var(--glass);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--b1);border-radius:var(--rm);
+  padding:14px 10px;text-align:center;
+  transition:border-color .2s,transform .2s;position:relative;overflow:hidden;
+}
+.scard:hover{border-color:rgba(240,180,41,.20);transform:translateY(-2px)}
+.scard::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:var(--atg);opacity:.45;
+}
+.snum{
+  font-size:30px;font-weight:900;line-height:1;
+  background:var(--atg);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.slbl{font-size:10.5px;color:var(--mu2);margin-top:5px;font-weight:600;letter-spacing:.4px}
+
+/* ══ BOT CONTROL CARD ══ */
+.bcard{
+  background:var(--glass);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--b1);border-radius:var(--r);
+  padding:20px;margin-bottom:12px;position:relative;overflow:hidden;
+}
+.bcard::before{
+  content:'';position:absolute;top:0;left:6%;right:6%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),var(--cyan),transparent);
+  opacity:.4;
+}
+.brow{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.bico{
+  width:46px;height:46px;border-radius:14px;
+  background:var(--bg3);border:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  transition:all .3s;flex-shrink:0;
+}
+.bico.run{background:rgba(240,180,41,.10);border-color:rgba(240,180,41,.25);box-shadow:0 0 22px rgba(240,180,41,.12)}
+.bico.stp{background:rgba(248,81,73,.08);border-color:rgba(248,81,73,.18)}
+.binfo{flex:1}
+.btxt{font-size:16px;font-weight:800;transition:color .3s}
+.bsub{font-size:12px;color:var(--mu2);margin-top:2px}
+
+/* Main Action Button */
+.mbtn{
+  width:100%;padding:16px;border:none;border-radius:14px;
+  font-size:15.5px;font-weight:800;cursor:pointer;letter-spacing:.5px;
+  position:relative;overflow:hidden;
+  transition:transform .14s,filter .14s,box-shadow .2s;
+  -webkit-appearance:none;font-family:inherit;
+}
+.mbtn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);
+  transform:translateX(-120%);transition:transform .44s ease;
+}
+.mbtn:hover::after{transform:translateX(120%)}
+.mbtn:hover{filter:brightness(1.10)}
+.mbtn:active{transform:scale(.972)}
+.mbtn:disabled{opacity:.5;cursor:not-allowed;filter:none}
+.mbtn.start{background:var(--atg);color:#030610;box-shadow:0 8px 28px rgba(240,180,41,.28),0 0 40px rgba(0,229,255,.08)}
+.mbtn.stop{background:var(--atg2);color:#fff;box-shadow:0 8px 28px rgba(248,81,73,.24)}
+.mbtn.loading{background:var(--bg3);color:var(--mu);box-shadow:none}
+
+/* ══ INFO TILES ══ */
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.itile{
+  background:rgba(0,0,0,.28);border:1px solid var(--b1);
+  border-radius:var(--rs);padding:12px;
+  display:flex;align-items:center;gap:10px;transition:border-color .2s;
+}
+.itile:hover{border-color:rgba(240,180,41,.16)}
+.itile-ico{font-size:20px;flex-shrink:0}
+.itile-txt{font-size:12px;color:var(--mu2);line-height:1.4;font-weight:500}
+
+/* Download card */
+.dlcard{
+  background:linear-gradient(135deg,rgba(240,180,41,.06),rgba(0,229,255,.04));
+  border:1px solid rgba(240,180,41,.16);border-radius:var(--r);
+  padding:18px;margin-bottom:12px;text-align:center;
+}
+.dlcard-title{font-size:13px;font-weight:800;margin-bottom:4px;
+  background:var(--atg);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.dlcard-sub{font-size:12px;color:var(--mu2);margin-bottom:14px}
+.qr-w{display:inline-block;background:#fff;padding:10px;border-radius:12px;margin-bottom:14px}
+.qr-w img{display:block;width:128px;height:128px;border-radius:4px}
+.dl-btn{
+  display:block;background:var(--atg);color:#030610;text-decoration:none;
+  padding:13px;border-radius:12px;font-size:14px;font-weight:800;
+  transition:filter .15s,transform .15s;
+}
+.dl-btn:hover{filter:brightness(1.08)}
+.dl-btn:active{transform:scale(.975)}
+
+/* ══ ITEM CARDS (URLs / Messages) ══ */
+.pcard{
+  background:rgba(0,0,0,.30);border:1px solid var(--b1);
+  border-radius:var(--rm);margin-bottom:9px;overflow:hidden;
+  transition:border-color .2s,box-shadow .2s;animation:cardIn .18s var(--ease);
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.pcard:hover{border-color:rgba(240,180,41,.16);box-shadow:0 3px 16px rgba(0,0,0,.28),0 0 16px rgba(240,180,41,.04)}
+.pcard-body{display:flex;align-items:flex-start;gap:10px;padding:12px 12px 8px}
+.pcard-num{
+  width:22px;height:22px;border-radius:50%;
+  background:rgba(240,180,41,.12);color:var(--gold);
+  font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;
+}
+.pcard-content{flex:1;min-width:0}
+.pcard-text{font-size:13px;color:var(--tx);word-break:break-all;line-height:1.5}
+.pcard-text.url{color:var(--cyan);font-size:12px}
+.pcard-meta{font-size:10.5px;color:var(--mu);margin-top:3px}
+.pcard-foot{
+  display:flex;gap:6px;padding:7px 12px 10px;
+  border-top:1px solid var(--b0);
+  align-items:center;background:rgba(0,0,0,.18);
+}
+.spacer{flex:1}
+
+/* Action buttons */
+.abt{
+  border:none;border-radius:7px;padding:6px 11px;font-size:11.5px;
+  font-weight:600;cursor:pointer;display:flex;align-items:center;
+  gap:4px;transition:all .15s;font-family:inherit;
+}
+.abt-copy{background:rgba(255,255,255,.05);color:var(--mu2)}
+.abt-copy:hover{background:rgba(0,229,255,.12);color:var(--cyan)}
+.abt-edit{background:rgba(255,255,255,.05);color:var(--mu2)}
+.abt-edit:hover{background:rgba(240,180,41,.12);color:var(--gold)}
+.abt-del{background:rgba(248,81,73,.07);color:var(--re)}
+.abt-del:hover{background:rgba(248,81,73,.16);color:#ff9d99}
+.abt-del.cfm{background:var(--re);color:#fff;animation:pulse .35s ease}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+.ied{
+  width:100%;background:rgba(0,0,0,.45);
+  border:1px solid var(--gold);color:var(--tx);
+  border-radius:7px;padding:8px 10px;font-size:13px;
+  resize:vertical;outline:none;margin-top:6px;min-height:52px;font-family:inherit;
+}
+
+.add-panel{
+  background:var(--glass);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--b1);border-radius:var(--r);
+  padding:16px;margin-top:4px;
+}
+.add-panel-title{
+  font-size:11px;color:var(--mu2);text-transform:uppercase;
+  letter-spacing:1px;margin-bottom:10px;font-weight:700;
+}
+.add-row{display:flex;gap:8px;align-items:flex-start}
+
+/* ══ INPUTS ══ */
+.txt-in{
+  flex:1;background:rgba(0,0,0,.42);
+  border:1px solid var(--b1);color:var(--tx);
+  padding:12px 14px;border-radius:10px;font-size:14px;
+  outline:none;min-width:0;font-family:inherit;
+  transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;
+}
+.txt-in::placeholder{color:rgba(90,110,142,.5)}
+.txt-in:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,180,41,.10)}
+textarea.txt-in{resize:vertical;line-height:1.5}
+
+.add-btn{
+  background:var(--atg);border:none;color:#030610;
+  padding:12px 18px;border-radius:10px;
+  font-size:14px;font-weight:800;cursor:pointer;
+  flex-shrink:0;transition:filter .15s,transform .15s;font-family:inherit;
+}
+.add-btn:hover{filter:brightness(1.08)}
+.add-btn:active{transform:scale(.96)}
+.empty{text-align:center;color:var(--mu);padding:32px 0;font-size:13px;line-height:1.9}
+
+/* ══ SETTINGS ══ */
+.cfg-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 0;border-bottom:1px solid var(--b0);gap:10px;
+}
+.cfg-row:last-of-type{border-bottom:none}
+.cfg-lbl{font-size:13.5px;color:var(--tx);font-weight:500}
+
+.cfg-in{
+  width:78px;background:rgba(0,0,0,.42);
+  border:1px solid var(--b2);color:var(--tx);
+  padding:7px 10px;border-radius:8px;
+  font-size:13.5px;text-align:center;
+  outline:none;font-family:inherit;transition:border-color .2s;-webkit-appearance:none;
+}
+.cfg-in:focus{border-color:var(--gold)}
+select.cfg-in{cursor:pointer}
+
+/* Toggle */
+.tog{position:relative;width:46px;height:26px;flex-shrink:0}
+.tog input{display:none}
+.tog-sl{
+  position:absolute;inset:0;background:rgba(255,255,255,.08);
+  border:1px solid var(--b1);border-radius:26px;cursor:pointer;transition:.25s;
+}
+.tog-sl::before{
+  content:'';position:absolute;width:20px;height:20px;
+  left:2px;top:2px;background:var(--mu);border-radius:50%;transition:.25s;
+}
+.tog input:checked+.tog-sl{background:var(--gold2);border-color:var(--gold)}
+.tog input:checked+.tog-sl::before{transform:translateX(20px);background:#fff}
+
+/* Speed pills */
+.spills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.spill-btn{
+  padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;
+  border:1px solid var(--b1);background:rgba(0,0,0,.30);
+  color:var(--mu2);cursor:pointer;transition:all .2s;font-family:inherit;
+}
+.spill-btn.on{background:var(--atg);color:#030610;border-color:transparent;box-shadow:0 4px 16px rgba(240,180,41,.20)}
+.spill-btn:hover:not(.on){border-color:rgba(240,180,41,.22);color:var(--gold)}
+
+.save-btn{
+  width:100%;padding:14px;background:var(--atg);
+  border:none;color:#030610;border-radius:12px;
+  font-size:15px;font-weight:800;cursor:pointer;
+  margin-top:16px;letter-spacing:.3px;
+  transition:filter .15s,transform .15s;font-family:inherit;
+  box-shadow:0 6px 22px rgba(240,180,41,.22);
+}
+.save-btn:hover{filter:brightness(1.08)}
+.save-btn:active{transform:scale(.973)}
+
+/* Cookies */
+.cstat{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 0;border-bottom:1px solid var(--b0);margin-bottom:14px;
+}
+.cdot{width:10px;height:10px;border-radius:50%;background:var(--mu);flex-shrink:0;transition:all .3s}
+.cdot.ok{background:var(--gold);box-shadow:0 0 10px rgba(240,180,41,.5)}
+.cdot.err{background:var(--re)}
+.ctxt{font-size:13px;color:var(--mu2);flex:1}
+
+/* ══ LOGS ══ */
+.log-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.log-live{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gold);font-weight:700}
+.log-ld{width:7px;height:7px;border-radius:50%;background:var(--gold);animation:lpulse 1.4s ease-in-out infinite}
+@keyframes lpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.log-clr{
+  background:rgba(255,255,255,.05);border:1px solid var(--b1);
+  color:var(--mu);padding:6px 13px;border-radius:8px;
+  font-size:12px;cursor:pointer;font-family:inherit;transition:all .2s;
+}
+.log-clr:hover{border-color:rgba(240,180,41,.22);color:var(--gold)}
+.log-box{
+  background:rgba(0,0,0,.48);border:1px solid var(--b1);
+  border-radius:var(--rm);padding:12px;
+  height:calc(100dvh - var(--hh) - var(--nh) - 82px);
+  overflow-y:auto;
+  font-family:'SF Mono',Menlo,'Courier New',monospace;
+  font-size:11.5px;line-height:1.75;-webkit-overflow-scrolling:touch;
+}
+.ll{color:var(--mu);word-break:break-all;padding:1px 0}
+.ll.info{color:var(--green)}
+.ll.sent{color:var(--cyan)}
+.ll.warn{color:var(--ye)}
+.ll.error{color:var(--re)}
+
+/* ══ TOAST ══ */
+.toast{
+  position:fixed;top:calc(var(--hh) + 10px);left:50%;
+  transform:translateX(-50%) translateY(-6px);
+  padding:10px 22px;border-radius:24px;font-size:13px;font-weight:600;
+  z-index:9999;opacity:0;pointer-events:none;
+  white-space:nowrap;max-width:90vw;text-align:center;
+  transition:opacity .22s,transform .22s;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--atg);color:#030610;box-shadow:0 6px 24px rgba(240,180,41,.30)}
+.toast.err{background:linear-gradient(135deg,var(--re),var(--re2));color:#fff;box-shadow:0 6px 24px rgba(248,81,73,.30)}
+
+/* ══ SPINNER ══ */
+.sp{
+  display:inline-block;width:14px;height:14px;
+  border:2px solid rgba(0,0,0,.18);border-top-color:rgba(0,0,0,.7);
+  border-radius:50%;animation:spin .5s linear infinite;
+  vertical-align:middle;margin-right:5px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══ PLAN PAGE CSS ══ */
+.plan-hero{
+  border-radius:var(--r);overflow:hidden;
+  margin-bottom:12px;position:relative;
+  padding:28px 20px 24px;text-align:center;
+  background:linear-gradient(135deg,rgba(240,180,41,.15),rgba(0,229,255,.10));
+  border:1px solid rgba(240,180,41,.22);
+}
+.plan-hero-bg{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 80% at 50% 0%,rgba(240,180,41,.10),transparent 70%);
+  pointer-events:none;
+}
+.plan-hero-content{position:relative;z-index:1}
+.plan-badge{
+  display:inline-block;padding:5px 20px;border-radius:20px;
+  font-size:12px;font-weight:900;letter-spacing:2px;
+  margin-bottom:10px;
+}
+.plan-badge.free{background:rgba(255,255,255,.10);color:var(--mu2);border:1px solid var(--b2)}
+.plan-badge.paid{background:var(--atg);color:#030610;border:none;
+  box-shadow:0 4px 18px rgba(240,180,41,.35)}
+.plan-hero-title{font-size:22px;font-weight:900;color:var(--tx);margin-bottom:4px}
+.plan-hero-title.paid-title{
+  background:var(--atg);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.plan-hero-sub{font-size:13px;color:var(--mu2)}
+.plan-expiry{font-size:12px;color:var(--gold);margin-top:8px;font-weight:700}
+
+/* Usage bar */
+.usage-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.usage-lbl{font-size:13px;color:var(--tx2);font-weight:600}
+.usage-pct{font-size:13px;font-weight:800;color:var(--gold)}
+.usage-bar-bg{
+  height:10px;background:rgba(255,255,255,.08);
+  border-radius:10px;overflow:hidden;margin-bottom:10px;
+}
+.usage-bar-fill{
+  height:100%;background:var(--atg);border-radius:10px;
+  transition:width .6s var(--ease);
+}
+.usage-bar-fill.danger{background:linear-gradient(90deg,var(--or),var(--re))}
+.usage-note{font-size:12px;color:var(--mu);line-height:1.5}
+
+/* Upgrade CTA */
+.upgrade-cta{
+  background:linear-gradient(135deg,rgba(240,180,41,.12),rgba(0,229,255,.08));
+  border:1px solid rgba(240,180,41,.28);
+  border-radius:var(--r);padding:20px;margin-bottom:12px;
+  text-align:center;position:relative;overflow:hidden;
+}
+.upgrade-cta::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(240,180,41,.08),transparent 65%);
+}
+.upgrade-cta-icon{font-size:32px;margin-bottom:8px;position:relative}
+.upgrade-cta-title{font-size:18px;font-weight:900;color:var(--tx);margin-bottom:5px;position:relative}
+.upgrade-cta-sub{font-size:13px;color:var(--mu2);margin-bottom:16px;position:relative;line-height:1.6}
+.upgrade-cta-sub strong{color:var(--gold)}
+.upgrade-cta-btn{
+  display:inline-block;background:var(--atg);
+  color:#030610;text-decoration:none;
+  padding:14px 32px;border-radius:14px;
+  font-size:15px;font-weight:900;letter-spacing:.4px;
+  position:relative;transition:filter .15s,transform .15s;
+  box-shadow:0 8px 28px rgba(240,180,41,.30);
+}
+.upgrade-cta-btn:hover{filter:brightness(1.08)}
+.upgrade-cta-btn:active{transform:scale(.975)}
+
+/* Feature comparison */
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.feat-col{background:rgba(0,0,0,.25);border:1px solid var(--b1);border-radius:var(--rs);padding:12px}
+.feat-paid-col{background:rgba(240,180,41,.06);border-color:rgba(240,180,41,.20)}
+.feat-head{font-size:12px;font-weight:800;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--b1)}
+.free-h{color:var(--mu2)}
+.paid-h{color:var(--gold)}
+.feat-item{font-size:12px;color:var(--tx2);padding:3px 0;line-height:1.5}
+.err-item{color:var(--mu)}
+
+/* ══ RESPONSIVE ══ */
+@media(min-width:600px){
+  .page{padding:20px 20px 10px;max-width:700px;margin:0 auto}
+  .sgrid{gap:12px} .snum{font-size:32px}
+  .igrid{grid-template-columns:repeat(2,1fr)}
+}
+@media(min-width:1024px){
+  :root{--hh:66px;--nh:68px}
+  .page{max-width:820px;padding:24px 0 12px}
+  .hdr{padding:0 24px}
+  .nb{font-size:11px} .nb svg{width:23px;height:23px}
+  .snum{font-size:34px}
+}
+</style>
+</head>
+<body>
+
+<!-- BG -->
+<div id="bg">
+  <div class="bg-base"></div>
+  <div class="orb og"></div>
+  <div class="orb oc"></div>
+  <div class="bg-grid"></div>
+</div>
+
+<!-- ══ HEADER ══ -->
+<header class="hdr">
+  <div class="hdr-logo">
+    <div class="hdr-hex">⚡</div>
+    <div class="hdr-brand-txt">
+      <div class="hdr-atg">AsifTechGlobal</div>
+      <div class="hdr-sub">YT Bot Panel</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="spill stp" id="statusPill">
+      <div class="sdot" id="sDot"></div>
+      <span id="sLabel">Loading…</span>
+    </div>
+    <button class="nb-btn" id="notifBtn" onclick="toggleNotif()">
+      <span id="notifIco">🔔</span>
+    </button>
+    <a href="/logout" class="u-badge" id="userBadge" title="Logout">
+      <img id="userAvatar" src="" alt="">
+      <span id="userName">…</span>
+    </a>
+  </div>
+</header>
+
+<!-- ══ DASHBOARD ══ -->
+<div class="page on" id="pg-dash">
+
+  <div class="sgrid">
+    <div class="scard"><div class="snum" id="sUrls">—</div><div class="slbl">URLs</div></div>
+    <div class="scard"><div class="snum" id="sMsgs">—</div><div class="slbl">Messages</div></div>
+    <div class="scard"><div class="snum" id="sTabs">—</div><div class="slbl">Max Tabs</div></div>
+  </div>
+
+  <!-- Bot Control -->
+  <div class="bcard">
+    <div class="ctitle">Bot Control</div>
+    <div class="brow">
+      <div class="bico stp" id="botIco">⏸</div>
+      <div class="binfo">
+        <div class="btxt" id="botTxt" style="color:var(--re)">Bot is Stopped</div>
+        <div class="bsub" id="botSub">Click Start to begin automation</div>
+      </div>
+    </div>
+    <button class="mbtn loading" id="mainBtn" onclick="toggleBot()">⟳ Connecting…</button>
+  </div>
+
+  <!-- Info tiles -->
+  <div class="card">
+    <div class="ctitle">Data Files</div>
+    <div class="igrid">
+      <div class="itile"><div class="itile-ico">⚙️</div><div class="itile-txt">config.json<br>Bot settings</div></div>
+      <div class="itile"><div class="itile-ico">🔗</div><div class="itile-txt">urls.txt<br>YouTube URLs</div></div>
+      <div class="itile"><div class="itile-ico">💬</div><div class="itile-txt">messages.txt<br>Chat messages</div></div>
+      <div class="itile"><div class="itile-ico">📋</div><div class="itile-txt">send_log.txt<br>Activity log</div></div>
+    </div>
+  </div>
+
+  <!-- Android Download -->
+  <div class="dlcard">
+    <div class="dlcard-title">📱 AsifTechGlobal Android App</div>
+    <div class="dlcard-sub">Same WiFi pe phone se scan karo</div>
+    <div class="qr-w"><img id="qrImg" src="" alt="QR"></div><br>
+    <a href="/download" target="_blank" class="dl-btn">⬇ Android Download Page</a>
+  </div>
+</div>
+
+<!-- ══ URLs ══ -->
+<div class="page" id="pg-urls">
+  <div class="card">
+    <div class="ph">
+      <div class="ph-l"><div class="ph-title">🔗 YouTube URLs</div><span class="ph-badge" id="urlBadge">0</span></div>
+    </div>
+    <div id="urlList"><div class="empty">Loading…</div></div>
+  </div>
+  <div class="add-panel">
+    <div class="add-panel-title">➕ Add New URL</div>
+    <div class="add-row">
+      <input class="txt-in" id="urlIn" type="url" placeholder="https://youtube.com/watch?v=…" inputmode="url">
+      <button class="add-btn" onclick="addUrl()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MESSAGES ══ -->
+<div class="page" id="pg-msgs">
+  <div class="card">
+    <div class="ph">
+      <div class="ph-l"><div class="ph-title">💬 Chat Messages</div><span class="ph-badge" id="msgBadge">0</span></div>
+    </div>
+    <div id="msgList"><div class="empty">Loading…</div></div>
+  </div>
+  <div class="add-panel">
+    <div class="add-panel-title">➕ Add New Message</div>
+    <textarea class="txt-in" id="msgIn" rows="3" placeholder="Type your chat message here…"
+      style="width:100%;margin-bottom:10px"></textarea>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span id="msgCC" style="font-size:11.5px;color:var(--mu)">0 chars</span>
+      <button class="add-btn" onclick="addMsg()">Add Message</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SETTINGS ══ -->
+<div class="page" id="pg-cfg">
+  <div class="card">
+    <div class="ctitle">Speed Preset</div>
+    <div class="spills">
+      <button class="spill-btn" onclick="applyPreset('slow',this)">🐢 Slow</button>
+      <button class="spill-btn on" id="sp-normal" onclick="applyPreset('normal',this)">⚡ Normal</button>
+      <button class="spill-btn" onclick="applyPreset('fast',this)">🚀 Fast</button>
+      <button class="spill-btn" onclick="applyPreset('turbo',this)">🔥 Turbo</button>
+      <button class="spill-btn" onclick="applyPreset('custom',this)">🎛 Custom</button>
+    </div>
+    <div class="cfg-row"><div class="cfg-lbl">Max Tabs</div><input class="cfg-in" type="number" id="c_MAX_TABS" min="1" max="20"></div>
+    <div class="cfg-row"><div class="cfg-lbl">Speed Mode</div>
+      <select class="cfg-in" id="c_SPEED_MODE">
+        <option value="slow">Slow</option>
+        <option value="normal">Normal</option>
+        <option value="fast">Fast</option>
+        <option value="turbo">Turbo</option>
+        <option value="custom">Custom</option>
+      </select>
+    </div>
+    <div class="cfg-row"><div class="cfg-lbl">Interval (sec)</div><input class="cfg-in" type="number" id="c_INTERVAL" min="1"></div>
+    <div class="cfg-row"><div class="cfg-lbl">Min Delay (sec)</div><input class="cfg-in" type="number" id="c_MIN_DELAY" min="1"></div>
+    <div class="cfg-row"><div class="cfg-lbl">Max Delay (sec)</div><input class="cfg-in" type="number" id="c_MAX_DELAY" min="1"></div>
+    <div class="cfg-row"><div class="cfg-lbl">Batch Sleep (sec)</div><input class="cfg-in" type="number" id="c_BATCH_SLEEP" min="1"></div>
+    <div class="cfg-row"><div class="cfg-lbl">Random Delay</div><label class="tog"><input type="checkbox" id="c_RANDOM_DELAY"><div class="tog-sl"></div></label></div>
+    <div class="cfg-row"><div class="cfg-lbl">Human Scroll</div><label class="tog"><input type="checkbox" id="c_HUMAN_SCROLL"><div class="tog-sl"></div></label></div>
+    <div class="cfg-row"><div class="cfg-lbl">Mouse Emulation</div><label class="tog"><input type="checkbox" id="c_MOUSE_MOVE"><div class="tog-sl"></div></label></div>
+    <div class="cfg-row"><div class="cfg-lbl">Headless Mode</div><label class="tog"><input type="checkbox" id="c_HEADLESS"><div class="tog-sl"></div></label></div>
+    <div class="cfg-row"><div class="cfg-lbl">Allow Duplicate Msgs</div><label class="tog"><input type="checkbox" id="c_ALLOW_DUP"><div class="tog-sl"></div></label></div>
+    <button class="save-btn" onclick="saveConfig()">💾 Save Settings</button>
+  </div>
+
+  <!-- Cookies -->
+  <div class="card">
+    <div class="ctitle">
+      📱 YouTube Cookies
+      <span style="background:rgba(240,180,41,.15);color:var(--gold);border:1px solid rgba(240,180,41,.24);border-radius:4px;padding:1px 7px;font-size:9px;letter-spacing:.5px">MOBILE MODE</span>
+    </div>
+    <div class="cstat">
+      <div class="cdot err" id="cDot"></div>
+      <span class="ctxt" id="cTxt">Checking…</span>
+    </div>
+    <div style="font-size:12.5px;color:var(--mu2);margin-bottom:12px;line-height:1.75">
+      <strong style="color:var(--tx)">Cookies kaise lein:</strong><br>
+      1. Firefox → YouTube login → Cookie Editor add-on<br>
+      2. Export → <strong>Header String</strong> → Copy<br>
+      3. Neeche paste karo → Save
+    </div>
+    <textarea id="cookieIn" class="txt-in" rows="4"
+      style="width:100%;font-size:11px;font-family:monospace;resize:vertical"
+      placeholder="SID=xxx; HSID=xxx; SSID=xxx; SAPISID=xxx; …"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="save-btn" style="flex:1;margin-top:0;padding:12px;font-size:13.5px" onclick="saveCookies()">💾 Save Cookies</button>
+      <button onclick="clearCookies()"
+        style="background:rgba(248,81,73,.10);border:1px solid rgba(248,81,73,.22);color:var(--re);border-radius:12px;padding:12px 16px;font-size:14px;cursor:pointer;font-weight:700;transition:all .2s"
+        onmouseover="this.style.background='rgba(248,81,73,.20)'" onmouseout="this.style.background='rgba(248,81,73,.10)'">🗑</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PLAN PAGE ══ -->
+<div class="page" id="pg-plan">
+
+  <div class="plan-hero" id="planHero">
+    <div class="plan-hero-bg"></div>
+    <div class="plan-hero-content">
+      <div class="plan-badge free" id="planBadge">FREE</div>
+      <div class="plan-hero-title" id="planTitle">Free Plan</div>
+      <div class="plan-hero-sub" id="planSub">1200 comments demo</div>
+      <div class="plan-expiry" id="planExpiry" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="card" id="usageCard">
+    <div class="ctitle">Comment Usage</div>
+    <div class="usage-row">
+      <span class="usage-lbl" id="usageLbl">0 / 1200 used</span>
+      <span class="usage-pct" id="usagePct">0%</span>
+    </div>
+    <div class="usage-bar-bg">
+      <div class="usage-bar-fill" id="usageBarFill" style="width:0%"></div>
+    </div>
+    <div class="usage-note" id="usageNote">Free mein 1200 comments — uske baad upgrade karo</div>
+  </div>
+
+  <div class="upgrade-cta" id="upgradeCta">
+    <div class="upgrade-cta-icon">🚀</div>
+    <div class="upgrade-cta-title">Unlimited Comments</div>
+    <div class="upgrade-cta-sub">Sirf <strong>₹20</strong> mein <strong>20 din</strong> unlimited automation</div>
+    <a href="/upgrade" class="upgrade-cta-btn">⚡ Upgrade Now — ₹20</a>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">🔑 Activate Plan Key</div>
+    <div style="font-size:12.5px;color:var(--mu2);margin-bottom:12px;line-height:1.7">
+      Payment ke baad tumhe ek key milegi.<br>
+      Woh key neeche enter karo — plan turant active ho jaega.
+    </div>
+    <div style="display:flex;gap:8px">
+      <input class="txt-in" id="keyInput" type="text" placeholder="ATG-XXXX-XXXXXX"
+        style="text-transform:uppercase;font-family:monospace;letter-spacing:1px" autocomplete="off">
+      <button class="add-btn" onclick="activateKey()">Activate</button>
+    </div>
+    <div class="key-result" id="keyResult" style="display:none;margin-top:12px;padding:11px 14px;border-radius:10px;font-size:13px"></div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">Plan Comparison</div>
+    <div class="feat-grid">
+      <div class="feat-col">
+        <div class="feat-head free-h">🆓 Free Plan</div>
+        <div class="feat-item">✅ 1200 comments</div>
+        <div class="feat-item">✅ All features</div>
+        <div class="feat-item err-item">❌ Bot stops at 1200</div>
+        <div class="feat-item err-item">❌ No turbo mode</div>
+      </div>
+      <div class="feat-col feat-paid-col">
+        <div class="feat-head paid-h">⚡ Paid ₹20/20 din</div>
+        <div class="feat-item">✅ Unlimited comments</div>
+        <div class="feat-item">✅ Never stops</div>
+        <div class="feat-item">✅ Turbo speed</div>
+        <div class="feat-item">✅ Priority support</div>
+      </div>
+    </div>
+    <a href="/upgrade" style="display:block;background:var(--atg);color:#030610;text-decoration:none;padding:14px;border-radius:12px;text-align:center;font-size:14px;font-weight:800;margin-top:14px;">
+      ₹20 mein Upgrade Karo →
+    </a>
+  </div>
+</div>
+
+<!-- ══ LOGS ══ -->
+<div class="page" id="pg-logs">
+  <div class="log-hdr">
+    <div class="log-live" id="logLive"><div class="log-ld"></div><span>ATG Live Feed</span></div>
+    <button class="log-clr" onclick="clearLogs()">Clear</button>
+  </div>
+  <div class="log-box" id="logBox">
+    <div class="ll" style="color:var(--mu)">Connecting to ATG log stream…</div>
+  </div>
+</div>
+
+<!-- ══ BOTTOM NAV ══ -->
+<nav class="bnav">
+  <button class="nb on" id="nb-dash" onclick="goPage('dash')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+    Home
+  </button>
+  <button class="nb" id="nb-urls" onclick="goPage('urls')">
+    <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+    URLs
+    <div class="nb-cnt" id="nb-cnt-urls">0</div>
+  </button>
+  <button class="nb" id="nb-msgs" onclick="goPage('msgs')">
+    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Messages
+    <div class="nb-cnt" id="nb-cnt-msgs">0</div>
+  </button>
+  <button class="nb" id="nb-cfg" onclick="goPage('cfg')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Settings
+  </button>
+  <button class="nb" id="nb-plan" onclick="goPage('plan')">
+    <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" stroke="none"/></svg>
+    Plan
+    <div class="nb-cnt" id="nb-cnt-plan" style="background:var(--gold);color:#030610;display:none">!</div>
+  </button>
+  <button class="nb" id="nb-logs" onclick="goPage('logs')">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    Logs
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══ STATE ══ */
+let botRunning=false,sseSource=null,cfgCache={},autoScroll=true;
+const _dt={};
+
+/* ══ INIT ══ */
+(async function init(){
+  try{
+    const u=await fetch('/api/me').then(r=>r.json());
+    document.getElementById('userName').textContent=u.name||u.email.split('@')[0];
+    if(u.avatar){const img=document.getElementById('userAvatar');img.src=u.avatar;img.style.display='block'}
+  }catch{}
+  const ip=location.hostname;
+  const qr=document.getElementById('qrImg');
+  if(qr)qr.src=`https://api.qrserver.com/v1/create-qr-code/?size=128x128&data=${encodeURIComponent('http://'+ip+':5000/download/android')}`;
+  updateNotifBtn();
+  await pollStatus();
+  await loadStats();
+  setInterval(pollStatus,3000);
+  setInterval(loadStats,10000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')pollStatus()});
+  window.addEventListener('online',pollStatus);
+})();
+
+/* ══ PAGES ══ */
+function goPage(n){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pg-'+n).classList.add('on');
+  document.getElementById('nb-'+n).classList.add('on');
+  if(n==='urls')   loadUrls();
+  if(n==='msgs')   loadMsgs();
+  if(n==='cfg')    {loadConfig();loadCookieStatus()}
+  if(n==='logs')   startSSE();
+  if(n==='plan')   loadPlan();
+}
+
+/* ══ TOAST ══ */
+let _tt=null;
+function toast(msg,type='ok'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className='toast show '+type;
+  if(_tt)clearTimeout(_tt);
+  _tt=setTimeout(()=>el.classList.remove('show'),2400);
+}
+
+/* ══ STATUS ══ */
+function updateStatus(running){
+  botRunning=running;
+  const pill=document.getElementById('statusPill');
+  const dot=document.getElementById('sDot');
+  const lbl=document.getElementById('sLabel');
+  const ico=document.getElementById('botIco');
+  const txt=document.getElementById('botTxt');
+  const sub=document.getElementById('botSub');
+  const btn=document.getElementById('mainBtn');
+  pill.className='spill '+(running?'run':'stp');
+  lbl.textContent=running?'Running':'Stopped';
+  ico.className='bico '+(running?'run':'stp');
+  ico.textContent=running?'▶':'⏸';
+  txt.textContent=running?'Bot is Running':'Bot is Stopped';
+  txt.style.color=running?'var(--gold)':'var(--re)';
+  sub.textContent=running?'ATG automation active — sending messages':'Click Start to begin automation';
+  btn.className='mbtn '+(running?'stop':'start');
+  btn.textContent=running?'⏹  Stop Bot':'▶  Start Bot';
+  btn.disabled=false;
+}
+
+async function pollStatus(){
+  try{
+    const ctrl=new AbortController();
+    const tid=setTimeout(()=>ctrl.abort(),4000);
+    const d=await fetch('/api/status',{signal:ctrl.signal}).then(r=>r.json());
+    clearTimeout(tid);updateStatus(d.running);
+  }catch{}
+}
+
+/* ══ STATS ══ */
+async function loadStats(){
+  try{
+    const[ur,mr,cr]=await Promise.all([
+      fetch('/api/urls').then(r=>r.json()),
+      fetch('/api/messages').then(r=>r.json()),
+      fetch('/api/config').then(r=>r.json()),
+    ]);
+    document.getElementById('sUrls').textContent=ur.length;
+    document.getElementById('sMsgs').textContent=mr.length;
+    document.getElementById('sTabs').textContent=cr.MAX_TABS||'—';
+    const uc=document.getElementById('nb-cnt-urls');
+    const mc=document.getElementById('nb-cnt-msgs');
+    uc.textContent=ur.length;uc.classList.toggle('show',ur.length>0);
+    mc.textContent=mr.length;mc.classList.toggle('show',mr.length>0);
+  }catch{}
+}
+
+/* ══ TOGGLE BOT ══ */
+async function toggleBot(){
+  const btn=document.getElementById('mainBtn');
+  btn.disabled=true;btn.className='mbtn loading';
+  btn.innerHTML='<span class="sp"></span>Please wait…';
+  try{
+    const a=botRunning?'stop':'start';
+    const ctrl=new AbortController();
+    const tid=setTimeout(()=>ctrl.abort(),8000);
+    const d=await fetch('/api/'+a,{method:'POST',signal:ctrl.signal}).then(r=>r.json());
+    clearTimeout(tid);
+    toast(d.ok?d.msg:d.msg,d.ok?'ok':'err');
+  }catch(e){
+    toast(e.name==='AbortError'?'Timeout — retry karo':'Connection error','err');
+  }finally{
+    await pollStatus();
+  }
+}
+
+/* ══ URLs ══ */
+async function loadUrls(){
+  const el=document.getElementById('urlList');
+  el.innerHTML='<div class="empty">Loading…</div>';
+  try{
+    const urls=await fetch('/api/urls').then(r=>r.json());
+    document.getElementById('urlBadge').textContent=urls.length;
+    if(!urls.length){el.innerHTML='<div class="empty">No URLs yet.<br><small>Add a YouTube Live URL below.</small></div>';return}
+    el.innerHTML=urls.map((u,i)=>`
+      <div class="pcard" id="uc-${i}">
+        <div class="pcard-body">
+          <div class="pcard-num">${i+1}</div>
+          <div class="pcard-content">
+            <div class="pcard-text url">${esc(u)}</div>
+            <div class="pcard-meta">YouTube Live Stream</div>
+          </div>
+        </div>
+        <div class="pcard-foot">
+          <button class="abt abt-copy" onclick="copyTxt(${JSON.stringify(esc(u))},this)">📋 Copy</button>
+          <button class="abt abt-edit" onclick="openUE(${i},${JSON.stringify(esc(u))})">✏️ Edit</button>
+          <div class="spacer"></div>
+          <button class="abt abt-del" id="del-u-${i}" data-val="${esc(u)}"
+            onclick="cfmDel('url',this.dataset.val,${i},this)">🗑 Delete</button>
+        </div>
+        <div id="ue-${i}" style="display:none;padding:8px 12px 12px">
+          <input class="ied" style="height:40px;min-height:40px;resize:none" type="url"
+            id="ue-in-${i}" value="${esc(u)}">
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="abt" style="background:var(--atg);color:#030610;flex:1"
+              data-old="${esc(u)}" onclick="saveUE(${i},this.dataset.old)">✅ Save</button>
+            <button class="abt abt-copy" onclick="closeE('ue',${i})">✕ Cancel</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }catch{el.innerHTML='<div class="empty" style="color:var(--re)">Load failed.</div>'}
+}
+
+async function addUrl(){
+  const inp=document.getElementById('urlIn');
+  const url=inp.value.trim();
+  if(!url){toast('Enter a URL','err');return}
+  if(!url.includes('youtube.com')&&!url.includes('youtu.be')){toast('Not a YouTube URL','err');return}
+  const d=await fetch('/api/urls',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})}).then(r=>r.json());
+  if(d.ok){inp.value='';toast('✅ URL added!');loadUrls();loadStats()}
+  else toast(d.msg||'Error','err');
+}
+async function execDelUrl(url){
+  const d=await fetch('/api/urls',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})}).then(r=>r.json());
+  if(d.ok){toast('🗑 Deleted');loadUrls();loadStats()}
+  else{toast(d.msg||'Failed','err');loadUrls()}
+}
+function openUE(i,v){
+  document.getElementById('ue-'+i).style.display='block';
+  const inp=document.getElementById('ue-in-'+i);inp.value=v;inp.focus();inp.select();
+}
+async function saveUE(i,old){
+  const n=document.getElementById('ue-in-'+i).value.trim();
+  if(!n||n===old){closeE('ue',i);return}
+  await execDelUrl(old);
+  const d=await fetch('/api/urls',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:n})}).then(r=>r.json());
+  if(d.ok){toast('✅ Updated');loadUrls()}else toast(d.msg||'Failed','err');
+}
+document.getElementById('urlIn').addEventListener('keydown',e=>{if(e.key==='Enter')addUrl()});
+
+/* ══ Messages ══ */
+async function loadMsgs(){
+  const el=document.getElementById('msgList');
+  el.innerHTML='<div class="empty">Loading…</div>';
+  try{
+    const msgs=await fetch('/api/messages').then(r=>r.json());
+    document.getElementById('msgBadge').textContent=msgs.length;
+    if(!msgs.length){el.innerHTML='<div class="empty">No messages yet.<br><small>Add chat messages below.</small></div>';return}
+    el.innerHTML=msgs.map((m,i)=>`
+      <div class="pcard" id="mc-${i}">
+        <div class="pcard-body">
+          <div class="pcard-num">${i+1}</div>
+          <div class="pcard-content">
+            <div class="pcard-text">${esc(m)}</div>
+            <div class="pcard-meta">${m.length} chars</div>
+          </div>
+        </div>
+        <div class="pcard-foot">
+          <button class="abt abt-copy" onclick="copyTxt(${JSON.stringify(esc(m))},this)">📋 Copy</button>
+          <button class="abt abt-edit" onclick="openME(${i},${JSON.stringify(esc(m))})">✏️ Edit</button>
+          <div class="spacer"></div>
+          <button class="abt abt-del" id="del-m-${i}" data-val="${esc(m)}"
+            onclick="cfmDel('msg',this.dataset.val,${i},this)">🗑 Delete</button>
+        </div>
+        <div id="me-${i}" style="display:none;padding:8px 12px 12px">
+          <textarea class="ied" id="me-in-${i}">${esc(m)}</textarea>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="abt" style="background:var(--atg);color:#030610;flex:1"
+              data-old="${esc(m)}" onclick="saveME(${i},this.dataset.old)">✅ Save</button>
+            <button class="abt abt-copy" onclick="closeE('me',${i})">✕ Cancel</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }catch{el.innerHTML='<div class="empty" style="color:var(--re)">Load failed.</div>'}
+}
+async function addMsg(){
+  const inp=document.getElementById('msgIn');
+  const message=inp.value.trim();
+  if(!message){toast('Enter a message','err');return}
+  const d=await fetch('/api/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})}).then(r=>r.json());
+  if(d.ok){inp.value='';document.getElementById('msgCC').textContent='0 chars';toast('✅ Added!');loadMsgs();loadStats()}
+  else toast(d.msg||'Error','err');
+}
+async function execDelMsg(message){
+  const d=await fetch('/api/messages',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})}).then(r=>r.json());
+  if(d.ok){toast('🗑 Deleted');loadMsgs();loadStats()}
+  else{toast(d.msg||'Failed','err');loadMsgs()}
+}
+function openME(i,v){document.getElementById('me-'+i).style.display='block';const ta=document.getElementById('me-in-'+i);ta.value=v;ta.focus()}
+async function saveME(i,old){
+  const n=document.getElementById('me-in-'+i).value.trim();
+  if(!n||n===old){closeE('me',i);return}
+  await execDelMsg(old);
+  const d=await fetch('/api/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:n})}).then(r=>r.json());
+  if(d.ok){toast('✅ Updated');loadMsgs()}else toast(d.msg||'Failed','err');
+}
+function closeE(p,i){const el=document.getElementById(p+'-'+i);if(el)el.style.display='none'}
+document.getElementById('msgIn').addEventListener('input',function(){
+  document.getElementById('msgCC').textContent=this.value.length+' chars';
+});
+
+/* ══ Delete confirm ══ */
+function cfmDel(type,value,idx,btn){
+  const key=type+'-'+idx;
+  if(_dt[key]){
+    clearTimeout(_dt[key]);delete _dt[key];
+    btn.disabled=true;btn.textContent='⏳';
+    type==='url'?execDelUrl(value):execDelMsg(value);
+  }else{
+    btn.classList.add('cfm');btn.textContent='⚠️ Confirm?';
+    _dt[key]=setTimeout(()=>{
+      delete _dt[key];
+      if(btn&&document.contains(btn)){btn.classList.remove('cfm');btn.textContent='🗑 Delete';btn.disabled=false}
+    },3200);
+  }
+}
+
+/* ══ Copy ══ */
+function copyTxt(t,btn){
+  navigator.clipboard.writeText(t).then(()=>{
+    const o=btn.innerHTML;btn.innerHTML='✅ Copied!';btn.style.color='var(--gold)';
+    setTimeout(()=>{btn.innerHTML=o;btn.style.color=''},1500);
+  }).catch(()=>toast('Copy failed','err'));
+}
+
+/* ══ Config ══ */
+const PRESETS={
+  slow:{INTERVAL:25,MIN_DELAY:10,MAX_DELAY:20,BATCH_SLEEP_DELAY:15},
+  normal:{INTERVAL:15,MIN_DELAY:3,MAX_DELAY:6,BATCH_SLEEP_DELAY:6},
+  fast:{INTERVAL:8,MIN_DELAY:2,MAX_DELAY:4,BATCH_SLEEP_DELAY:3},
+  turbo:{INTERVAL:4,MIN_DELAY:1,MAX_DELAY:2,BATCH_SLEEP_DELAY:2},
+};
+function applyPreset(mode,el){
+  document.querySelectorAll('.spill-btn').forEach(p=>p.classList.remove('on'));
+  if(el)el.classList.add('on');
+  document.getElementById('c_SPEED_MODE').value=mode;
+  if(!PRESETS[mode])return;
+  const p=PRESETS[mode];
+  document.getElementById('c_INTERVAL').value=p.INTERVAL;
+  document.getElementById('c_MIN_DELAY').value=p.MIN_DELAY;
+  document.getElementById('c_MAX_DELAY').value=p.MAX_DELAY;
+  document.getElementById('c_BATCH_SLEEP').value=p.BATCH_SLEEP_DELAY;
+}
+async function loadConfig(){
+  try{
+    const c=await fetch('/api/config').then(r=>r.json());
+    cfgCache=c;
+    const mode=c.SPEED_MODE||'normal';
+    document.getElementById('c_SPEED_MODE').value=mode;
+    document.getElementById('c_MAX_TABS').value=c.MAX_TABS??5;
+    document.getElementById('c_INTERVAL').value=c.INTERVAL??15;
+    document.getElementById('c_MIN_DELAY').value=c.MIN_DELAY??3;
+    document.getElementById('c_MAX_DELAY').value=c.MAX_DELAY??6;
+    document.getElementById('c_BATCH_SLEEP').value=(c.LOOP_SETTINGS||{}).BATCH_SLEEP_DELAY??6;
+    document.getElementById('c_RANDOM_DELAY').checked=!!c.RANDOM_DELAY;
+    document.getElementById('c_HUMAN_SCROLL').checked=!!(c.ANTI_BAN_SETTINGS||{}).HUMAN_SCROLL;
+    document.getElementById('c_MOUSE_MOVE').checked=!!(c.ANTI_BAN_SETTINGS||{}).MOUSE_MOVE_EMULATION;
+    document.getElementById('c_HEADLESS').checked=!!(c.SYSTEM_SETTINGS||{}).HEADLESS_MODE;
+    document.getElementById('c_ALLOW_DUP').checked=!!(c.LOOP_SETTINGS||{}).ALLOW_DUPLICATE_MESSAGES;
+    // Sync pill
+    const modes=['slow','normal','fast','turbo','custom'];
+    document.querySelectorAll('.spill-btn').forEach((p,i)=>{p.classList.toggle('on',modes[i]===mode)});
+  }catch{toast('Config load failed','err')}
+}
+async function saveConfig(){
+  const cfg=JSON.parse(JSON.stringify(cfgCache));
+  const mode=document.getElementById('c_SPEED_MODE').value||'normal';
+  cfg.SPEED_MODE=mode;
+  cfg.MAX_TABS=parseInt(document.getElementById('c_MAX_TABS').value)||5;
+  cfg.INTERVAL=parseInt(document.getElementById('c_INTERVAL').value)||15;
+  cfg.MIN_DELAY=parseInt(document.getElementById('c_MIN_DELAY').value)||3;
+  cfg.MAX_DELAY=parseInt(document.getElementById('c_MAX_DELAY').value)||6;
+  cfg.RANDOM_DELAY=document.getElementById('c_RANDOM_DELAY').checked;
+  cfg.ANTI_BAN_SETTINGS=cfg.ANTI_BAN_SETTINGS||{};
+  cfg.ANTI_BAN_SETTINGS.HUMAN_SCROLL=document.getElementById('c_HUMAN_SCROLL').checked;
+  cfg.ANTI_BAN_SETTINGS.MOUSE_MOVE_EMULATION=document.getElementById('c_MOUSE_MOVE').checked;
+  cfg.SYSTEM_SETTINGS=cfg.SYSTEM_SETTINGS||{};
+  cfg.SYSTEM_SETTINGS.HEADLESS_MODE=document.getElementById('c_HEADLESS').checked;
+  cfg.LOOP_SETTINGS=cfg.LOOP_SETTINGS||{};
+  cfg.LOOP_SETTINGS.BATCH_SLEEP_DELAY=parseInt(document.getElementById('c_BATCH_SLEEP').value)||6;
+  cfg.LOOP_SETTINGS.ALLOW_DUPLICATE_MESSAGES=document.getElementById('c_ALLOW_DUP').checked;
+  cfg.SPEED_SETTINGS=cfg.SPEED_SETTINGS||{};
+  if(PRESETS[mode])cfg.SPEED_SETTINGS[mode]={INTERVAL:cfg.INTERVAL,MIN_DELAY:cfg.MIN_DELAY,MAX_DELAY:cfg.MAX_DELAY,BATCH_SLEEP_DELAY:cfg.LOOP_SETTINGS.BATCH_SLEEP_DELAY};
+  const d=await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cfg)}).then(r=>r.json());
+  if(d.ok){cfgCache=cfg;toast('✅ Settings saved!');loadStats()}
+  else toast('Save failed','err');
+}
+
+/* ══ Cookies ══ */
+async function loadCookieStatus(){
+  try{
+    const d=await fetch('/api/cookies').then(r=>r.json());
+    const dot=document.getElementById('cDot');
+    const txt=document.getElementById('cTxt');
+    if(d.has_cookies){
+      dot.className='cdot ok';txt.style.color='var(--gold)';
+      txt.textContent=`✓ ${d.count} cookies set (${d.cookie_keys.substring(0,36)}…)`;
+    }else{
+      dot.className='cdot err';txt.style.color='var(--re)';
+      txt.textContent='✗ No cookies — Mobile bot will not work';
+    }
+  }catch{}
+}
+async function saveCookies(){
+  const raw=document.getElementById('cookieIn').value.trim();
+  if(!raw){toast('Cookies paste karo pehle','err');return}
+  const d=await fetch('/api/cookies',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cookies:raw})}).then(r=>r.json());
+  if(d.ok){document.getElementById('cookieIn').value='';toast(d.msg,'ok');loadCookieStatus()}
+  else toast(d.msg||'Error','err');
+}
+async function clearCookies(){
+  const d=await fetch('/api/cookies',{method:'DELETE',headers:{'Content-Type':'application/json'}}).then(r=>r.json());
+  if(d.ok){toast('Cookies cleared','ok');loadCookieStatus()}
+}
+
+/* ══ Logs SSE ══ */
+function startSSE(){
+  if(sseSource)return;
+  const box=document.getElementById('logBox');box.innerHTML='';
+  sseSource=new EventSource('/api/logs');
+  sseSource.onmessage=e=>{
+    if(!e.data.trim())return;
+    appendLog(e.data);
+    const l=e.data.toLowerCase();
+    if(l.includes('sent on tab')||l.includes('sending'))pNotif('💬 Message Sent',e.data.substring(0,80),'sent');
+    else if(l.includes('error')||l.includes('failed'))pNotif('⚠️ ATG Error',e.data.substring(0,80),'error');
+  };
+  sseSource.onerror=()=>document.getElementById('logLive').style.color='var(--ye)';
+  sseSource.onopen=()=>document.getElementById('logLive').style.color='var(--gold)';
+  document.getElementById('logBox').addEventListener('scroll',function(){
+    autoScroll=this.scrollHeight-this.scrollTop-this.clientHeight<30;
+  });
+}
+function appendLog(line){
+  const box=document.getElementById('logBox');
+  const d=document.createElement('div');d.className='ll';
+  const l=line.toLowerCase();
+  if(l.includes('sent on')||l.includes('sending'))d.classList.add('sent');
+  else if(l.includes('error')||l.includes('crash')||l.includes('failed'))d.classList.add('error');
+  else if(l.includes('warn')||l.includes('waiting'))d.classList.add('warn');
+  else if(l.includes('started')||l.includes('opening')||l.includes('info'))d.classList.add('info');
+  d.textContent=line;box.appendChild(d);
+  while(box.children.length>300)box.removeChild(box.firstChild);
+  if(autoScroll)box.scrollTop=box.scrollHeight;
+}
+function clearLogs(){document.getElementById('logBox').innerHTML='';toast('Logs cleared')}
+
+/* ══ Push Notifications ══ */
+let notifOn=Notification?.permission==='granted';
+function updateNotifBtn(){
+  const btn=document.getElementById('notifBtn');
+  const ico=document.getElementById('notifIco');
+  if(!('Notification' in window)){btn.style.display='none';return}
+  btn.classList.toggle('on',notifOn);
+  ico.textContent=notifOn?'🔔':'🔕';
+}
+async function toggleNotif(){
+  if(!('Notification' in window)){alert('Not supported');return}
+  if(notifOn){notifOn=false;updateNotifBtn();toast('Notifications off');return}
+  const p=await Notification.requestPermission();
+  notifOn=p==='granted';updateNotifBtn();
+  if(notifOn){toast('✅ Notifications on!');pNotif('🔔 AsifTechGlobal','Notifications enabled!')}
+  else toast('Permission denied','err');
+}
+function pNotif(title,body,tag=''){
+  if(!notifOn||Notification.permission!=='granted')return;
+  try{new Notification(title,{body,tag:tag||title})}catch{}
+}
+
+/* ══ Helper ══ */
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+/* ══ PLAN ══ */
+async function loadPlan(){
+  try{
+    const p=await fetch('/api/plan').then(r=>r.json());
+    const badge=document.getElementById('planBadge');
+    const title=document.getElementById('planTitle');
+    const sub=document.getElementById('planSub');
+    const expiry=document.getElementById('planExpiry');
+    const usageLbl=document.getElementById('usageLbl');
+    const usagePct=document.getElementById('usagePct');
+    const fill=document.getElementById('usageBarFill');
+    const note=document.getElementById('usageNote');
+    const cta=document.getElementById('upgradeCta');
+
+    if(p.active){
+      // PAID
+      badge.className='plan-badge paid';badge.textContent='⚡ PAID';
+      title.className='plan-hero-title paid-title';title.textContent='Unlimited Plan';
+      sub.textContent='Unlimited comments — 20 din';
+      expiry.style.display='block';
+      // Format expiry
+      const exp=new Date(p.expires+' UTC');
+      const daysLeft=Math.max(0,Math.ceil((exp-Date.now())/86400000));
+      expiry.textContent=`⏳ ${daysLeft} din remaining (Expires: ${exp.toLocaleDateString('en-IN')})`;
+      // Hide usage bar
+      document.getElementById('usageCard').style.display='none';
+      cta.style.display='none';
+      // Nav dot
+      document.getElementById('nb-cnt-plan').style.display='none';
+    }else{
+      // FREE
+      badge.className='plan-badge free';badge.textContent='FREE';
+      title.className='plan-hero-title';title.textContent='Free Plan';
+      sub.textContent='1200 comments demo';
+      expiry.style.display='none';
+      document.getElementById('usageCard').style.display='block';
+      cta.style.display='block';
+      // Bar
+      const used=p.sends_used||0;
+      const total=p.free_limit||1200;
+      const pct=Math.min(100,Math.round(used/total*100));
+      usageLbl.textContent=`${used} / ${total} used`;
+      usagePct.textContent=pct+'%';
+      fill.style.width=pct+'%';
+      if(pct>=80)fill.classList.add('danger');else fill.classList.remove('danger');
+      note.textContent=pct>=100?'❌ Limit khatam! Upgrade karo':
+                       pct>=80 ?`⚠️ Sirf ${total-used} comments bache — jaldi upgrade karo!`:
+                       `${total-used} comments remaining`;
+      // Nav dot — show ! when >80%
+      const dot=document.getElementById('nb-cnt-plan');
+      dot.style.display=pct>=80?'flex':'none';
+    }
+  }catch(e){console.error(e)}
+}
+
+async function activateKey(){
+  const k=document.getElementById('keyInput').value.trim().toUpperCase();
+  const res=document.getElementById('keyResult');
+  if(!k||k.length<8){
+    res.style.display='block';res.style.background='rgba(248,81,73,.12)';
+    res.style.border='1px solid rgba(248,81,73,.25)';res.style.color='var(--re)';
+    res.textContent='Valid key enter karo (ATG-XXXX-XXXXXX format)';return;
+  }
+  res.style.display='block';res.style.background='rgba(255,255,255,.05)';
+  res.style.border='1px solid var(--b1)';res.style.color='var(--mu2)';
+  res.textContent='⏳ Checking key…';
+  try{
+    const d=await fetch('/api/activate-plan',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({key:k})
+    }).then(r=>r.json());
+    if(d.ok){
+      res.style.background='rgba(240,180,41,.12)';
+      res.style.border='1px solid rgba(240,180,41,.28)';
+      res.style.color='var(--gold)';
+      res.textContent=d.msg;
+      document.getElementById('keyInput').value='';
+      setTimeout(()=>loadPlan(),800);
+    }else{
+      res.style.background='rgba(248,81,73,.12)';
+      res.style.border='1px solid rgba(248,81,73,.25)';
+      res.style.color='var(--re)';
+      res.textContent='❌ '+d.msg;
+    }
+  }catch{
+    res.style.color='var(--re)';res.textContent='Connection error';
+  }
+}
+
+// Load plan status on init too (for nav dot)
+setTimeout(loadPlan,1500);
+</script>
+</body>
+</html>

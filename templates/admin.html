@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#02040a">
+<title>ATG Admin Panel</title>
+<style>
+:root{
+  --bg:#02040a;--bg2:#060c18;--bg3:#0a1228;
+  --b1:rgba(255,255,255,0.08);--b2:rgba(255,255,255,0.14);
+  --tx:#f0f4ff;--tx2:#b8c4e0;--mu:#5a6e8e;--mu2:#8599bb;
+  --gold:#f0b429;--cyan:#00e5ff;--green:#00ffaa;
+  --re:#f85149;--bl:#4f8dff;--or:#fb923c;
+  --atg:linear-gradient(135deg,#f0b429,#00e5ff);
+  --r:14px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--bg);color:var(--tx);min-height:100vh;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+/* Header */
+.hdr{
+  background:rgba(6,12,24,.95);border-bottom:1px solid rgba(240,180,41,.15);
+  padding:14px 24px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.hdr-title{
+  font-size:18px;font-weight:900;
+  background:var(--atg);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hdr-badge{
+  background:rgba(248,81,73,.15);border:1px solid rgba(248,81,73,.3);
+  color:var(--re);border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;
+}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 48px}
+/* Cards */
+.card{
+  background:rgba(6,12,24,.80);border:1px solid var(--b1);
+  border-radius:var(--r);padding:20px;margin-bottom:20px;
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:6%;right:6%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(240,180,41,.25),transparent);
+}
+.card-title{
+  font-size:13px;font-weight:800;color:var(--tx);margin-bottom:16px;
+  text-transform:uppercase;letter-spacing:.8px;
+  display:flex;align-items:center;gap:8px;
+}
+.card-title::before{content:'';width:3px;height:14px;background:var(--atg);border-radius:2px}
+/* Stats row */
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.stat{
+  background:rgba(0,0,0,.3);border:1px solid var(--b1);
+  border-radius:12px;padding:14px 18px;flex:1;min-width:120px;
+}
+.stat-n{font-size:28px;font-weight:900;background:var(--atg);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.stat-l{font-size:11px;color:var(--mu2);margin-top:3px;font-weight:600}
+/* Key gen */
+.key-gen{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.num-in{
+  width:80px;background:rgba(0,0,0,.4);border:1px solid var(--b2);
+  color:var(--tx);padding:10px 12px;border-radius:10px;font-size:14px;
+  outline:none;text-align:center;font-family:inherit;
+}
+.num-in:focus{border-color:var(--gold)}
+.gen-btn{
+  background:var(--atg);border:none;color:#030610;
+  padding:11px 22px;border-radius:10px;font-size:14px;font-weight:800;
+  cursor:pointer;font-family:inherit;transition:filter .15s;
+}
+.gen-btn:hover{filter:brightness(1.08)}
+/* Key list */
+.key-grid{display:flex;flex-direction:column;gap:8px}
+.key-row{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(0,0,0,.28);border:1px solid var(--b1);
+  border-radius:10px;padding:10px 14px;
+}
+.key-row.used{opacity:.55}
+.key-code{
+  font-family:'SF Mono',Menlo,monospace;font-size:13px;font-weight:700;
+  color:var(--gold);letter-spacing:.5px;flex:1;
+}
+.key-code.used-code{color:var(--mu);text-decoration:line-through}
+.key-meta{font-size:11px;color:var(--mu2)}
+.copy-key{
+  background:rgba(240,180,41,.10);border:1px solid rgba(240,180,41,.20);
+  color:var(--gold);border-radius:7px;padding:5px 10px;
+  font-size:11.5px;font-weight:700;cursor:pointer;
+  transition:all .15s;font-family:inherit;
+}
+.copy-key:hover{background:rgba(240,180,41,.22)}
+.used-tag{
+  background:rgba(248,81,73,.12);border:1px solid rgba(248,81,73,.22);
+  color:var(--re);border-radius:7px;padding:3px 8px;font-size:10.5px;font-weight:700;
+}
+/* Users table */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{
+  text-align:left;padding:10px 12px;
+  background:rgba(0,0,0,.35);color:var(--mu2);
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+  border-bottom:1px solid var(--b1);
+}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--tx2)}
+tr:hover td{background:rgba(255,255,255,.02)}
+.badge{
+  display:inline-block;padding:2px 9px;border-radius:20px;
+  font-size:11px;font-weight:800;
+}
+.badge.free{background:rgba(255,255,255,.08);color:var(--mu2)}
+.badge.paid{background:rgba(240,180,41,.15);color:var(--gold);border:1px solid rgba(240,180,41,.25)}
+.badge.expired{background:rgba(248,81,73,.12);color:var(--re)}
+.act-btn{
+  background:rgba(0,229,255,.10);border:1px solid rgba(0,229,255,.20);
+  color:var(--cyan);border-radius:7px;padding:5px 10px;
+  font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;
+  transition:all .15s;margin-right:4px;
+}
+.act-btn:hover{background:rgba(0,229,255,.20)}
+.rst-btn{
+  background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.18);
+  color:var(--re);border-radius:7px;padding:5px 10px;
+  font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;
+  transition:all .15s;
+}
+.rst-btn:hover{background:rgba(248,81,73,.18)}
+/* Toast */
+.toast{
+  position:fixed;top:80px;left:50%;transform:translateX(-50%);
+  background:var(--atg);color:#030610;
+  padding:10px 22px;border-radius:20px;font-size:13px;font-weight:700;
+  z-index:999;opacity:0;transition:opacity .2s;pointer-events:none;
+}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-title">⚡ ATG Admin Panel</div>
+  <div class="hdr-badge">🔐 Admin Only</div>
+</div>
+
+<div class="wrap">
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-n">{{ users|length }}</div>
+      <div class="stat-l">Total Users</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n">{{ users|selectattr('plan','equalto','paid')|list|length }}</div>
+      <div class="stat-l">Paid Users</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n">{{ keys|length }}</div>
+      <div class="stat-l">Total Keys</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n">{{ keys|selectattr('used_by_email')|list|length }}</div>
+      <div class="stat-l">Used Keys</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n">₹{{ (keys|selectattr('used_by_email')|list|length) * plan_price }}</div>
+      <div class="stat-l">Est. Revenue</div>
+    </div>
+  </div>
+
+  <!-- Generate Keys -->
+  <div class="card">
+    <div class="card-title">🔑 Generate Activation Keys</div>
+    <div class="key-gen">
+      <label style="font-size:13px;color:var(--mu2)">How many keys?</label>
+      <input class="num-in" type="number" id="keyCount" value="1" min="1" max="50">
+      <button class="gen-btn" onclick="genKeys()">⚡ Generate Keys</button>
+    </div>
+    <div style="font-size:12px;color:var(--mu2);margin-bottom:14px">
+      Each key = ₹{{ plan_price }} payment → {{ plan_days }} days unlimited. Give key to user after payment verification.
+    </div>
+    <div class="key-grid" id="keyGrid">
+      {% for k in keys %}
+      <div class="key-row {{ 'used' if k.used_by_email else '' }}">
+        <div class="key-code {{ 'used-code' if k.used_by_email else '' }}">{{ k.key }}</div>
+        <div class="key-meta">{{ k.created_at[:10] if k.created_at else '' }}</div>
+        {% if k.used_by_email %}
+          <span class="used-tag">✓ {{ k.used_by_email }}</span>
+        {% else %}
+          <button class="copy-key" onclick="copyKey('{{ k.key }}', this)">📋 Copy</button>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Users -->
+  <div class="card">
+    <div class="card-title">👥 All Users</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Plan</th>
+            <th>Expires</th>
+            <th>Sends Used</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr id="urow-{{ u.id }}">
+            <td style="color:var(--mu2)">{{ u.id }}</td>
+            <td style="color:var(--cyan)">{{ u.email }}</td>
+            <td>{{ u.name }}</td>
+            <td>
+              {% if u.plan == 'paid' %}
+                <span class="badge paid">⚡ PAID</span>
+              {% else %}
+                <span class="badge free">FREE</span>
+              {% endif %}
+            </td>
+            <td style="font-size:12px;color:var(--mu2)">{{ u.plan_expires[:10] if u.plan_expires else '—' }}</td>
+            <td>
+              <span style="color:{{ 'var(--re)' if (u.sends_used or 0) >= free_limit else 'var(--tx2)' }}">
+                {{ u.sends_used or 0 }} / {{ free_limit }}
+              </span>
+            </td>
+            <td style="font-size:12px;color:var(--mu2)">{{ u.created_at[:10] if u.created_at else '—' }}</td>
+            <td>
+              <button class="act-btn" onclick="activateUser({{ u.id }}, {{ plan_days }}, this)">
+                ⚡ Give {{ plan_days }}d
+              </button>
+              <button class="rst-btn" onclick="resetUser({{ u.id }}, this)">🔄 Reset</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const ADMIN_KEY = '{{ admin_key }}';
+let _tt=null;
+function toast(msg){
+  const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
+  if(_tt)clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+function copyKey(k, btn){
+  navigator.clipboard.writeText(k).then(()=>{
+    const o=btn.innerHTML;btn.innerHTML='✅ Copied!';
+    setTimeout(()=>{btn.innerHTML=o},1500);
+  });
+}
+
+async function genKeys(){
+  const n=parseInt(document.getElementById('keyCount').value)||1;
+  const d=await fetch('/admin/gen-key',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({key:ADMIN_KEY,count:n})
+  }).then(r=>r.json());
+  if(d.ok){
+    toast(`✅ ${d.keys.length} keys generated!`);
+    // Prepend new keys to grid
+    const grid=document.getElementById('keyGrid');
+    d.keys.forEach(k=>{
+      const div=document.createElement('div');
+      div.className='key-row';
+      div.innerHTML=`<div class="key-code">${k}</div>
+        <div class="key-meta">Today</div>
+        <button class="copy-key" onclick="copyKey('${k}',this)">📋 Copy</button>`;
+      grid.prepend(div);
+    });
+  }else toast('Error generating keys');
+}
+
+async function activateUser(uid,days,btn){
+  if(!confirm(`Give ${days} day paid plan to user #${uid}?`))return;
+  const d=await fetch('/admin/set-plan',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({key:ADMIN_KEY,uid,days})
+  }).then(r=>r.json());
+  if(d.ok){
+    toast(`✅ Plan activated! Expires: ${d.expires.substring(0,10)}`);
+    // Update badge in table
+    const row=document.getElementById('urow-'+uid);
+    if(row){
+      const planCell=row.cells[3];
+      planCell.innerHTML='<span class="badge paid">⚡ PAID</span>';
+      row.cells[4].textContent=d.expires.substring(0,10);
+    }
+  }else toast('Error activating plan');
+}
+
+async function resetUser(uid,btn){
+  if(!confirm(`Reset user #${uid} to free plan + clear sends?`))return;
+  const d=await fetch('/admin/reset-user',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({key:ADMIN_KEY,uid})
+  }).then(r=>r.json());
+  if(d.ok){
+    toast('✅ User reset to free plan');
+    const row=document.getElementById('urow-'+uid);
+    if(row){
+      row.cells[3].innerHTML='<span class="badge free">FREE</span>';
+      row.cells[4].textContent='—';
+      row.cells[5].innerHTML='0 / {{ free_limit }}';
+    }
+  }else toast('Error resetting user');
+}
+</script>
+</body>
+</html>
