@@ -556,9 +556,12 @@ def api_start():
             pass
         env = os.environ.copy()
         env["BOT_DATA_DIR"] = str(u_dir(uid))
-        # Headless/Android mode: use bot_mobile.py (Cookie-based, no Selenium, no API key)
+        # Cloud (Render/Railway): always use bot_mobile.py — no Chrome available
+        # Local headless mode: also use bot_mobile.py
+        # Local PC: use full bot.py with Chrome
+        is_cloud    = bool(os.environ.get("RENDER") or os.environ.get("RAILWAY_ENVIRONMENT"))
         is_headless = os.environ.get("ATG_HEADLESS") == "1"
-        if is_headless:
+        if is_cloud or is_headless:
             cmd = [sys.executable, "-c", "from bot_mobile import start_bot; start_bot()"]
         # When frozen (.exe), pass --bot-mode flag; else use -c
         elif getattr(sys, "frozen", False):
