@@ -22,13 +22,17 @@ _app_dir    = os.environ.get("ATG_APP_DIR")
 _bundle_dir = os.environ.get("ATG_BUNDLE_DIR")
 
 # On cloud (Render/Railway), use /tmp for writable data
-# On local, use the app directory
-_is_cloud = os.environ.get("RENDER") or os.environ.get("RAILWAY_ENVIRONMENT")
+_is_cloud = bool(os.environ.get("RENDER") or os.environ.get("RAILWAY_ENVIRONMENT"))
 if _is_cloud:
     _data_dir = Path("/tmp/atg_data")
-    _data_dir.mkdir(parents=True, exist_ok=True)
 else:
     _data_dir = Path(_app_dir) if _app_dir else Path(__file__).parent.resolve()
+
+# Always create data dir
+try:
+    _data_dir.mkdir(parents=True, exist_ok=True)
+except Exception:
+    _data_dir = Path(__file__).parent.resolve()
 
 BASE_DIR    = Path(_app_dir) if _app_dir else Path(__file__).parent.resolve()
 _TMPL_DIR   = str(Path(_bundle_dir) / "templates") if _bundle_dir else None
@@ -49,6 +53,14 @@ import traceback as _tb
 @app.errorhandler(500)
 def handle_500(e):
     return {"ok": False, "error": str(e), "trace": _tb.format_exc()}, 500
+
+# Initialize DB on app startup (works with gunicorn too)
+with app.app_context():
+    try:
+        USER_DATA.mkdir(parents=True, exist_ok=True)
+        init_db()
+    except Exception as _e:
+        print(f"Startup init warning: {_e}")
 
 # ── Fix for HTTPS tunnels (serveo, localhost.run, ngrok) ──────────────────────
 app.config["SESSION_COOKIE_SECURE"]   = False   # allow over HTTP tunnel proxy
@@ -1022,7 +1034,7 @@ if __name__ == "__main__":
                 pass
 
     init_db()
-    USER_DATA.mkdir(exist_ok=True)
+    USER_DATA.mkdir(parents=True, exist_ok=True)
 
     def _get_ip():
         try:
