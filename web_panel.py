@@ -101,8 +101,35 @@ def load_user(uid):
 
 # ── Database ──────────────────────────────────────────────────────────────────
 def _db():
+    # Ensure data dir and DB exist on every connection (safe for gunicorn workers)
+    DB_FILE.parent.mkdir(parents=True, exist_ok=True)
     c = sqlite3.connect(str(DB_FILE))
     c.row_factory = sqlite3.Row
+    # Auto-create tables if not exist
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            email       TEXT    UNIQUE NOT NULL,
+            name        TEXT    NOT NULL,
+            password    TEXT,
+            google_id   TEXT,
+            facebook_id TEXT,
+            avatar      TEXT,
+            plan        TEXT    DEFAULT 'free',
+            plan_expires TEXT   DEFAULT NULL,
+            sends_used  INTEGER DEFAULT 0,
+            created_at  TEXT DEFAULT (datetime('now'))
+        )
+    """)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS act_keys (
+            key        TEXT PRIMARY KEY,
+            created_at TEXT DEFAULT (datetime('now')),
+            used_by    INTEGER DEFAULT NULL,
+            used_at    TEXT    DEFAULT NULL
+        )
+    """)
+    c.commit()
     return c
 
 
