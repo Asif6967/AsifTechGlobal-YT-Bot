@@ -89,11 +89,24 @@ def load_cookies():
     env_cookies = os.environ.get("YT_DEFAULT_COOKIES", "").strip()
     if env_cookies:
         return parse_cookie_string(env_cookies)
-    if not COOKIES_FILE.exists():
-        return None
+    # Hardcoded default cookies (fallback)
+    _hard = (
+        "__Secure-3PSID=g.a000CAkq_yFQsDneyoCj0wExPE_nWYy-1_93ZBjCIAZjmTbC8P24vMmhSclRPcxG6HmDcYulPAACgYKAe0SARYSFQHGX2Mi-KAYGpSpFsoycSfpanAL4RoVAUF8yKoRsdqTtFGH1e_gI91s7A9_0076;"
+        "SID=g.a000CAkq_yFQsDneyoCj0wExPE_nWYy-1_93ZBjCIAZjmTbC8P24_HAnxGzK-AlcTDJLrG_cuwACgYKAU4SARYSFQHGX2MiebyPFQNjeiUihIETFx8KdhoVAUF8yKpyFrwV1L2H7WiuxoL8N5kN0076;"
+        "SAPISID=rlP8438QvAsmSymw/AaLsNTP0NXLH7INhR;"
+        "SSID=ANNeSxsPIXxdtisa3;"
+        "HSID=A6xq1G9qLi8WOPQDX;"
+        "SIDCC=AKEyXzVEyaYlO41-3FQb9SADHGRtZFVoG0FhAOdUiblC0XHEp8IGD-5pscHtrOpbpUhkcHhHyfE;"
+        "__Secure-1PSID=g.a000CAkq_yFQsDneyoCj0wExPE_nWYy-1_93ZBjCIAZjmTbC8P24YjMCpyBpRhu3hsriLGg8-AACgYKAesSARYSFQHGX2Mi7xpst1c0vJtBJYmEtotN1BoVAUF8yKr1x7bONwUKIQnvlAKD-P_k0076;"
+        "APISID=StrFf9AHXzCrjtJK/AHyQsZhp54gqJzPo-;"
+        "__Secure-1PAPISID=rlP8438QvAsmSymw/AaLsNTP0NXLH7INhR;"
+        "__Secure-3PAPISID=rlP8438QvAsmSymw/AaLsNTP0NXLH7INhR"
+    )
+    if not COOKIES_FILE.exists() or not COOKIES_FILE.read_text(encoding="utf-8", errors="ignore").strip():
+        return parse_cookie_string(_hard)
     raw = COOKIES_FILE.read_text("utf-8", errors="ignore").strip()
     if not raw:
-        return None
+        return parse_cookie_string(_hard)
     return parse_cookie_string(raw)
 
 # ─── Protobuf encoder for YouTube params ─────────────────────────────────────
