@@ -85,6 +85,10 @@ def parse_cookie_string(raw: str) -> dict:
 
 
 def load_cookies():
+    # First check env variable (set on Render/Railway)
+    env_cookies = os.environ.get("YT_DEFAULT_COOKIES", "").strip()
+    if env_cookies:
+        return parse_cookie_string(env_cookies)
     if not COOKIES_FILE.exists():
         return None
     raw = COOKIES_FILE.read_text("utf-8", errors="ignore").strip()
