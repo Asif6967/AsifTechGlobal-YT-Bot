@@ -168,9 +168,47 @@ def get_page_context(url: str, session, logger) -> dict:
         if m:
             ctx["live_chat_id"] = m.group(1)
         else:
-            # Live chat redirect page check
-            m2 = re.search(r'"liveChatRenderer".*?"continuations".*?"liveChatReplayContinuationData".*?"continuation"\s*:\s*"([^"]+)"', txt, re.S)
-            if not m2:
+            # Try multiple patterns for live chat ID
+            patterns = [
+                r'"activeLiveChatId"\s*:\s*"([^"]+)"',
+                r'"liveChatId"\s*:\s*"([^"]+)"',
+                r'live_chat_id=([^"&\s]+)',
+                r'"continuation"\s*:\s*"([^"]+)".*?"liveChatRenderer"',
+                r'"liveChatRenderer".*?"continuations".*?"continuation"\s*:\s*"([^"]+)"',
+                r'\"[A-Za-z0-9_-]{10,}\".*?livechat',
+            ]
+            for pat in patterns:
+                m2 = re.search(pat, txt, re.S)
+                if m2:
+                    ctx["live_chat_id"] = m2.group(1)
+                    break
+
+            # Also try to get from initial data
+            if not ctx.get("live_chat_id"):
+                m3 = re.search(r'ytInitialData\s*=\s*(\{.{0,50000}\})\s*;', txt, re.S)
+                if m3:
+                    try:
+                        import json as _j
+                        data = _j.loads(m3.group(1))
+                        # Walk the dict to find activeLiveChatId
+                        def find_key(obj, key):
+                            if isinstance(obj, dict):
+                                if key in obj: return obj[key]
+                                for v in obj.values():
+                                    r = find_key(v, key)
+                                    if r: return r
+                            elif isinstance(obj, list):
+                                for item in obj:
+                                    r = find_key(item, key)
+                                    if r: return r
+                            return None
+                        cid = find_key(data, "activeLiveChatId") or find_key(data, "liveChatId")
+                        if cid:
+                            ctx["live_chat_id"] = cid
+                    except Exception:
+                        pass
+
+            if not ctx.get("live_chat_id"):
                 logger.warning(f"Live chat ID nahi mila: {url}")
 
     except Exception as e:
