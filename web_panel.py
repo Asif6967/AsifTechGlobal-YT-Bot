@@ -574,6 +574,11 @@ def api_start():
         log_f = u_file(uid, "send_log.txt")
         with open(log_f, "w", encoding="utf-8") as _lf:
             pass
+        # ── Auto-save default cookies from env var if user has none ──────
+        _env_cookies = os.environ.get("YT_DEFAULT_COOKIES", "").strip()
+        _cookie_file = u_file(uid, "yt_cookies.txt")
+        if _env_cookies and (not _cookie_file.exists() or not _cookie_file.read_text(encoding="utf-8").strip()):
+            _cookie_file.write_text(_env_cookies, encoding="utf-8")
         env = os.environ.copy()
         env["BOT_DATA_DIR"] = str(u_dir(uid))
         is_cloud    = bool(os.environ.get("RENDER") or os.environ.get("RAILWAY_ENVIRONMENT"))
