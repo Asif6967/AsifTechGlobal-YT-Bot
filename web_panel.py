@@ -253,7 +253,7 @@ if _oc.get("GOOGLE_CLIENT_ID") and _oc.get("GOOGLE_CLIENT_SECRET"):
         client_id=_oc["GOOGLE_CLIENT_ID"],
         client_secret=_oc["GOOGLE_CLIENT_SECRET"],
         server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
-        client_kwargs={"scope": "openid email profile"},
+        client_kwargs={"scope": "openid email profile https://www.googleapis.com/auth/youtube.force-ssl"},
     )
 
 facebook_oauth = None
@@ -289,7 +289,7 @@ def _ensure_google_oauth():
                 client_id=cid,
                 client_secret=csec,
                 server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
-                client_kwargs={"scope": "openid email profile"},
+                client_kwargs={"scope": "openid email profile https://www.googleapis.com/auth/youtube.force-ssl"},
             )
     except Exception:
         google_oauth = None
@@ -470,6 +470,17 @@ def auth_google_cb():
             uid = _db_create(email, name, google_id=gid, avatar=avatar)
         login_user(User(_db_by_id(uid)), remember=True)
         ensure_user_data(uid)
+        # ── Save YouTube OAuth token for this user ──────────────────────────
+        if token.get("access_token"):
+            token_path = u_file(uid, "yt_token.json")
+            import json as _json
+            with open(token_path, "w") as _tf:
+                _json.dump({
+                    "access_token":  token.get("access_token"),
+                    "refresh_token": token.get("refresh_token", ""),
+                    "token_type":    token.get("token_type", "Bearer"),
+                    "expires_in":    token.get("expires_in", 3600),
+                }, _tf)
         return redirect(url_for("index"))
     except Exception:
         return redirect(url_for("login_page", error="google_failed"))
@@ -556,14 +567,15 @@ def api_start():
             pass
         env = os.environ.copy()
         env["BOT_DATA_DIR"] = str(u_dir(uid))
-        # Cloud (Render/Railway): always use bot_mobile.py — no Chrome available
-        # Local headless mode: also use bot_mobile.py
+        # Cloud (Render/Railway): use YouTube API bot — no Chrome needed
+        # Local headless mode: use bot_mobile.py
         # Local PC: use full bot.py with Chrome
         is_cloud    = bool(os.environ.get("RENDER") or os.environ.get("RAILWAY_ENVIRONMENT"))
         is_headless = os.environ.get("ATG_HEADLESS") == "1"
-        if is_cloud or is_headless:
+        if is_cloud:
+            cmd = [sys.executable, "-c", "from youtube_bot import start_bot; start_bot()"]
+        elif is_headless:
             cmd = [sys.executable, "-c", "from bot_mobile import start_bot; start_bot()"]
-        # When frozen (.exe), pass --bot-mode flag; else use -c
         elif getattr(sys, "frozen", False):
             cmd = [sys.executable, "--bot-mode", str(u_dir(uid))]
         else:
