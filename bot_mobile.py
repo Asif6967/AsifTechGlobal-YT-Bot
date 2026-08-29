@@ -298,10 +298,14 @@ def start_bot():
         urls_now      = get_lines("urls.txt")
         messages      = get_lines("messages.txt")
 
+        # Default messages agar koi message nahi daala
         if not messages:
-            logger.warning("messages.txt mein koi message nahi — kuch messages daalo!")
-            time.sleep(10)
-            continue
+            messages = [
+                "Great stream! 🔥", "Amazing content! 👏", "Love this! ❤️",
+                "Keep it up! 💪", "Awesome! 🎉", "Great job! 👍",
+                "Fantastic! ⭐", "So good! 🙌", "Incredible! 😍",
+                "Best stream ever! 🏆"
+            ]
 
         # Reload cookies (user might update them in panel)
         new_cookies = load_cookies()

@@ -229,7 +229,16 @@ def ensure_user_data(uid):
     cfg = u_file(uid, "config.json")
     if not cfg.exists():
         cfg.write_text(json.dumps(DEFAULT_CONFIG, indent=4))
-    for fname in ("urls.txt", "messages.txt", "send_log.txt"):
+    # Default messages — auto filled so user doesn't have to add manually
+    msgs = u_file(uid, "messages.txt")
+    if not msgs.exists() or not msgs.read_text(encoding="utf-8").strip():
+        msgs.write_text(
+            "Great stream! 🔥\nAmazing content! 👏\nLove this! ❤️\n"
+            "Keep it up! 💪\nAwesome! 🎉\nGreat job! 👍\n"
+            "Fantastic! ⭐\nSo good! 🙌\nIncredible! 😍\nBest stream ever! 🏆\n",
+            encoding="utf-8"
+        )
+    for fname in ("urls.txt", "send_log.txt"):
         fp = u_file(uid, fname)
         if not fp.exists():
             fp.write_text("")
@@ -567,14 +576,17 @@ def api_start():
             pass
         env = os.environ.copy()
         env["BOT_DATA_DIR"] = str(u_dir(uid))
-        # Cloud (Render/Railway): use YouTube API bot — no Chrome needed
-        # Local headless mode: use bot_mobile.py
-        # Local PC: use full bot.py with Chrome
         is_cloud    = bool(os.environ.get("RENDER") or os.environ.get("RAILWAY_ENVIRONMENT"))
         is_headless = os.environ.get("ATG_HEADLESS") == "1"
-        if is_cloud:
+
+        # Check if user has YouTube token (from Google login)
+        has_yt_token = u_file(uid, "yt_token.json").exists()
+
+        if is_cloud and has_yt_token:
+            # Cloud + Google login = YouTube API bot (best)
             cmd = [sys.executable, "-c", "from youtube_bot import start_bot; start_bot()"]
-        elif is_headless:
+        elif is_cloud or is_headless:
+            # Cloud without token = cookie-based bot
             cmd = [sys.executable, "-c", "from bot_mobile import start_bot; start_bot()"]
         elif getattr(sys, "frozen", False):
             cmd = [sys.executable, "--bot-mode", str(u_dir(uid))]
