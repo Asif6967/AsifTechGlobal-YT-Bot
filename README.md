@@ -1,187 +1,98 @@
-# ⚡ AsifTechGlobal — YT Bot Panel
+# AsifTechGlobal — YT Bot Panel (repaired startup edition)
 
-<div align="center">
+A Flask control panel for configuring a YouTube Live bot per signed-in user. This repaired version focuses on reliable installation, transparent bot-start errors, and safe handling of local configuration.
 
-![AsifTechGlobal](https://img.shields.io/badge/AsifTechGlobal-YT%20Bot-f0b429?style=for-the-badge&logo=youtube&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python)
-![Flask](https://img.shields.io/badge/Flask-3.1-green?style=for-the-badge&logo=flask)
-![License](https://img.shields.io/badge/License-MIT-purple?style=for-the-badge)
+> **Use responsibly.** Automated activity may breach YouTube rules, and channel owners are responsible for the accounts and streams they control.
 
-**Ultra Premium YouTube Live Chat Automation Platform**
+## What was fixed
 
-*Free: 1200 comments demo | Paid: ₹20 = 20 days unlimited*
+- Added missing desktop runtime dependencies: `selenium` and `webdriver-manager`.
+- Reworked `START_SERVER.bat` so a double-click installs/checks dependencies and opens the intended launcher.
+- Repaired first-run setup: `config.json` and `oauth_config.json` are now created from the tracked example files.
+- Replaced the EXE build command that referenced a missing `AsifTechGlobal.spec` file.
+- Fixed the Flask database initialization order, eliminating the previous `init_db is not defined` startup warning.
+- Added `bot_runner.py`: import, driver, and runtime crashes are written to **Logs** instead of being silently hidden.
+- Removed session-cookie values that had been embedded in the mobile backend. See `SECURITY_NOTICE.md`.
 
-</div>
+## Windows — quickest start
 
----
+### Prerequisites
 
-## ✨ Features
+1. Install **Python 3.10+** and tick **Add Python to PATH** during installation.
+2. Install Google Chrome when using **Desktop mode**.
+3. Download/clone this folder.
 
-- 🤖 **Auto comment** on YouTube Live streams
-- 👥 **Multi-user** — each user gets their own isolated bot
-- 🔐 **Auth** — Email/Password + Google + Facebook OAuth
-- 📱 **Works everywhere** — PC, Mobile, iPhone, Android (Termux)
-- ⚡ **Speed modes** — Slow / Normal / Fast / Turbo / Custom
-- 💰 **Built-in monetization** — Free 1200 comments, then ₹20/20 days
-- 🔑 **Activation key system** — Generate & send keys after payment
-- 🛡️ **Anti-ban** — Human scroll, mouse emulation, random delays
-- 📊 **Live logs** — Real-time SSE log stream
-- 🔔 **Push notifications** — Browser notifications on bot events
-- 🌐 **PWA** — Install as app on mobile
+### Start
 
----
+Double-click `START_SERVER.bat`.
 
-## 🚀 Quick Start
+It installs the dependencies listed in `requirements.txt`, creates missing local config files, starts the panel, and opens:
 
-### 1. Clone
+- PC: `http://localhost:5000`
+- Phone on the same Wi-Fi: the `http://<local-IP>:5000` address printed in the console.
+
+Alternatively, run these commands in Command Prompt from this folder:
+
+```bat
+python -m pip install -r requirements.txt
+python app.py
+```
+
+## Configure before pressing Start
+
+1. Register a panel account and sign in.
+2. Add at least one active YouTube Live URL in **Streams**.
+3. Add/edit messages in **Messages**.
+4. In **Settings**, choose an appropriate interval and save.
+5. Press **Start Bot**.
+6. Open **Logs** if the bot stops or does not open Chrome.
+
+The panel now rejects a start request with no stream URL and reports fast subprocess failures directly in Logs. Common examples include a missing Chrome installation, a failed ChromeDriver download, expired authentication, or a non-live URL.
+
+## Authentication modes
+
+- **Desktop mode:** uses the local Chrome profile. Chrome must be installed.
+- **Cloud/headless mode:** requires an explicitly saved YouTube session cookie or a supported Google OAuth token. It never falls back to a cookie embedded in source code.
+- **Google OAuth:** copy `oauth_config.example.json` to `oauth_config.json`, add your own OAuth client credentials, and configure the exact callback URL displayed by your deployment.
+
+Never commit `oauth_config.json`, `.secret_key`, `users.db`, `user_data/`, or browser/session cookies.
+
+## Build a portable Windows EXE
+
+Run `build_exe.bat` on Windows. It installs PyInstaller, bundles the templates/static files plus required Python modules, and writes:
+
+```text
+dist\AsifTechGlobal.exe
+```
+
+The old build script could not work because it expected `AsifTechGlobal.spec`, but that file was not included in the repository. The repaired script builds directly from `app.py`.
+
+## Railway / Render deployment
+
+The provided `Procfile` and `railway.json` start:
+
+```text
+gunicorn web_panel:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
+```
+
+Use environment variables for deployment secrets rather than putting them in files:
+
+- `ATG_ADMIN_KEY` — a strong, unique admin key (do not leave the sample default in production).
+- `ATG_BOT_TOKEN` — a strong, unique internal bot token.
+- `YT_DEFAULT_COOKIES` — only if you intentionally operate the cookie-based mode and understand the account-security implications.
+
+The cloud file system may be temporary. Do not rely on its SQLite user data for production persistence.
+
+## Verify the repair locally
+
+Run the smoke test after dependencies are installed:
+
 ```bash
-git clone https://github.com/Asif6967/AsifTechGlobal-YT-Bot.git
-cd AsifTechGlobal-YT-Bot
+python smoke_test.py
 ```
 
-### 2. Install dependencies
-```bash
-pip install -r requirements.txt
-```
+It verifies Python compilation, Flask import/bootstrap, registration, authenticated API access, and the safe “no stream URL” rejection. It intentionally does **not** contact YouTube or start a browser.
 
-### 3. Setup config
-```bash
-# Copy example config
-copy config.example.json config.json
+## Security action
 
-# Optional: Setup Google/Facebook OAuth
-copy oauth_config.example.json oauth_config.json
-# Edit oauth_config.json with your credentials
-```
-
-### 4. Run
-```bash
-python web_panel.py
-```
-
-### 5. Open in browser
-```
-PC:     http://localhost:5000
-Mobile: http://YOUR_PC_IP:5000
-```
-
----
-
-## 📱 Android / Termux Setup
-
-1. Install **Termux** from F-Droid
-2. Go to `http://YOUR_PC_IP:5000` on phone → Download Android Package
-3. In Termux:
-```bash
-termux-setup-storage
-cp /sdcard/Download/AsifTechGlobal_Android.zip ~/
-cd ~/ && unzip AsifTechGlobal_Android.zip -d bot
-cd bot && bash termux_setup.sh
-python termux_app.py
-```
-
----
-
-## 💰 Monetization System
-
-| Plan | Price | Limit |
-|------|-------|-------|
-| **Free** | ₹0 | 1200 comments (lifetime demo) |
-| **Paid** | ₹20 | Unlimited for 20 days |
-
-### How it works:
-1. User hits 1200 comment limit → bot stops automatically
-2. User goes to `/upgrade` page → pays ₹20 via UPI
-3. User sends screenshot on WhatsApp
-4. You verify → generate key from `/admin?key=YOUR_ADMIN_KEY`
-5. User enters key → plan activates instantly
-
-### Admin Panel
-```
-http://localhost:5000/admin?key=atgadmin2024
-```
-> ⚠️ Change `ADMIN_SECRET` in `web_panel.py` before deploying!
-
----
-
-## ⚙️ Configuration
-
-Edit `config.json` (copy from `config.example.json`):
-
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `MAX_TABS` | Parallel browser tabs | 5 |
-| `INTERVAL` | Seconds between sends | 15 |
-| `MIN_DELAY` | Min random delay (sec) | 3 |
-| `MAX_DELAY` | Max random delay (sec) | 6 |
-| `SPEED_MODE` | slow/normal/fast/turbo/custom | normal |
-| `HEADLESS_MODE` | Run Chrome hidden | false |
-| `HUMAN_SCROLL` | Anti-ban scroll | true |
-
----
-
-## 🔐 Google OAuth Setup
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create project → APIs & Services → Credentials
-3. Create OAuth 2.0 Client ID (Web Application)
-4. Add Authorized Redirect URIs:
-   - `http://localhost:5000/auth/google/callback`
-   - `http://YOUR_IP:5000/auth/google/callback`
-5. Copy credentials to `oauth_config.json`
-
----
-
-## 🛠️ Tech Stack
-
-- **Backend:** Python, Flask, Flask-Login, Authlib
-- **Bot:** Selenium, WebDriver Manager
-- **Database:** SQLite (users, activation keys)
-- **Frontend:** Vanilla HTML/CSS/JS — no framework, ultra-premium design
-- **Mobile:** PWA + Termux Android support
-
----
-
-## 📁 Project Structure
-
-```
-AsifTechGlobal-YT-Bot/
-├── web_panel.py          # Main Flask app + all API routes
-├── bot.py                # Selenium bot (Chrome/desktop)
-├── bot_mobile.py         # Cookie-based bot (mobile/headless)
-├── bot_headless.py       # Headless variant
-├── browser_utils.py      # Shared browser utilities
-├── templates/
-│   ├── login.html        # Ultra-premium login page
-│   ├── index.html        # Main dashboard (5 pages)
-│   ├── upgrade.html      # Payment/upgrade page
-│   └── admin.html        # Admin panel
-├── static/
-│   ├── manifest.json     # PWA manifest
-│   ├── sw.js             # Service worker
-│   └── icon-192.png      # App icon
-├── config.example.json   # Config template
-├── oauth_config.example.json
-└── requirements.txt
-```
-
----
-
-## ⚠️ Important Notes
-
-- **Change admin password** before deploying: `ADMIN_SECRET` in `web_panel.py`
-- **Never commit** `oauth_config.json`, `users.db`, `.secret_key`
-- This tool is for **educational purposes** — use responsibly
-- YouTube's Terms of Service prohibit automated interactions
-
----
-
-## 👨‍💻 Author
-
-**AsifTechGlobal** — [GitHub](https://github.com/Asif6967)
-
----
-
-<div align="center">
-⭐ Star this repo if it helped you!
-</div>
+Read `SECURITY_NOTICE.md` before publishing this project. If the old public repository contained real session cookies, revoke those sessions immediately and clean them from Git history.

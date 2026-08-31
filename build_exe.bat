@@ -1,83 +1,65 @@
 @echo off
+setlocal
 chcp 65001 >nul
-title AsifTechGlobal — EXE Builder
+title AsifTechGlobal - EXE Builder
 color 0A
-
-echo.
-echo  ██████╗  ██╗   ██╗██╗██╗     ██████╗
-echo  ██╔══██╗ ██║   ██║██║██║     ██╔══██╗
-echo  ██████╔╝ ██║   ██║██║██║     ██║  ██║
-echo  ██╔══██╗ ██║   ██║██║██║     ██║  ██║
-echo  ██████╔╝ ╚██████╔╝██║███████╗██████╔╝
-echo  ╚═════╝   ╚═════╝ ╚═╝╚══════╝╚═════╝
-echo.
-echo  AsifTechGlobal — Software Builder
-echo  ====================================
-echo.
-
 cd /d "%~dp0"
 
-:: Check Python
+echo.
+echo  AsifTechGlobal - Portable EXE Builder
+echo  =====================================
+echo.
+
 python --version >nul 2>&1
-if %errorlevel% neq 0 (
-    echo  [ERROR] Python not found!
-    echo  Download from: https://python.org
-    pause & exit /b 1
-)
+if errorlevel 1 goto :no_python
 
-:: Install/update required packages
-echo  [1/4] Installing dependencies...
-python -m pip install flask flask-login authlib selenium webdriver-manager pyinstaller --quiet
-if %errorlevel% neq 0 (
-    echo  [ERROR] pip install failed!
-    pause & exit /b 1
-)
-echo        Done!
+echo [1/4] Installing build dependencies...
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt pyinstaller
+if errorlevel 1 goto :install_failed
 
-:: Clean old build
-echo  [2/4] Cleaning old build...
-if exist dist\AsifTechGlobal.exe del /q dist\AsifTechGlobal.exe
+echo [2/4] Removing previous build...
 if exist build rmdir /s /q build
-echo        Done!
+if exist dist rmdir /s /q dist
 
-:: Build EXE
-echo  [3/4] Building AsifTechGlobal.exe ...
-echo        (This takes 2-5 minutes, please wait...)
-echo.
-python -m PyInstaller AsifTechGlobal.spec --noconfirm --clean
-if %errorlevel% neq 0 (
-    echo.
-    echo  [ERROR] Build failed! See errors above.
-    pause & exit /b 1
-)
+echo [3/4] Building AsifTechGlobal.exe...
+REM Builds from app.py directly. The old script referenced an absent .spec file.
+python -m PyInstaller --noconfirm --clean --onefile --name AsifTechGlobal ^
+  --add-data "templates;templates" ^
+  --add-data "static;static" ^
+  --add-data "config.example.json;." ^
+  --add-data "oauth_config.example.json;." ^
+  --hidden-import web_panel ^
+  --hidden-import bot ^
+  --hidden-import bot_runner ^
+  --hidden-import bot_mobile ^
+  --hidden-import youtube_bot ^
+  --collect-all selenium ^
+  --collect-all webdriver_manager ^
+  --collect-all authlib ^
+  app.py
+if errorlevel 1 goto :build_failed
 
-:: Verify
-if not exist dist\AsifTechGlobal.exe (
-    echo  [ERROR] EXE not created!
-    pause & exit /b 1
-)
-
-echo.
-echo  [4/4] Done!
-echo.
-echo  ==========================================
-echo   SUCCESS!
-echo   File: dist\AsifTechGlobal.exe
-echo.
-
-:: Get file size
-for %%A in (dist\AsifTechGlobal.exe) do echo   Size: %%~zA bytes
+echo [4/4] Verifying output...
+if not exist dist\AsifTechGlobal.exe goto :build_failed
 
 echo.
-echo   SHARE KARNE KA TARIKA:
-echo   ----------------------
-echo   dist\AsifTechGlobal.exe ko kisi ko bhi bhejo
-echo   Double-click karein → Software chalu!
-echo   Chrome install hona chahiye (bot ke liye)
-echo   ==========================================
-echo.
-
-set /p OPEN="Open dist folder now? (y/n): "
-if /i "%OPEN%"=="y" explorer dist
-
+echo [SUCCESS] dist\AsifTechGlobal.exe is ready.
+echo Chrome must be installed on PCs using Desktop mode.
 pause
+goto :eof
+
+:no_python
+echo [ERROR] Python 3.10 or newer was not found in PATH.
+pause
+goto :eof
+
+:install_failed
+echo [ERROR] Package installation failed.
+pause
+goto :eof
+
+:build_failed
+echo [ERROR] EXE build failed. Copy the error above when requesting support.
+pause
+goto :eof

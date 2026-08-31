@@ -54,14 +54,6 @@ import traceback as _tb
 def handle_500(e):
     return {"ok": False, "error": str(e), "trace": _tb.format_exc()}, 500
 
-# Initialize DB on app startup (works with gunicorn too)
-with app.app_context():
-    try:
-        USER_DATA.mkdir(parents=True, exist_ok=True)
-        init_db()
-    except Exception as _e:
-        print(f"Startup init warning: {_e}")
-
 # ── Fix for HTTPS tunnels (serveo, localhost.run, ngrok) ──────────────────────
 app.config["SESSION_COOKIE_SECURE"]   = False   # allow over HTTP tunnel proxy
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
@@ -172,6 +164,15 @@ def init_db():
             )
         """)
         c.commit()
+
+
+# Initialize after init_db is defined; this path is also used by Gunicorn imports.
+with app.app_context():
+    try:
+        USER_DATA.mkdir(parents=True, exist_ok=True)
+        init_db()
+    except Exception as _e:
+        print(f"Startup init warning: {_e}")
 
 
 def _db_by_id(uid):
@@ -567,46 +568,61 @@ def api_status():
 @app.route("/api/start", methods=["POST"])
 @login_required
 def api_start():
+    """Start one isolated bot process and expose fast startup failures in Log."""
     uid = current_user.id
+    ensure_user_data(uid)
+    if not _read_lines(u_file(uid, "urls.txt")):
+        return jsonify({"ok": False, "msg": "Add at least one YouTube live URL before starting the bot."}), 400
+
     with _bot_lock:
         if _bot_running(uid):
             return jsonify({"ok": False, "msg": "Bot already running"})
+
         log_f = u_file(uid, "send_log.txt")
-        with open(log_f, "w", encoding="utf-8") as _lf:
-            pass
-        # ── Auto-save default cookies from env var if user has none ──────
+        log_f.write_text("", encoding="utf-8")
         _env_cookies = os.environ.get("YT_DEFAULT_COOKIES", "").strip()
         _cookie_file = u_file(uid, "yt_cookies.txt")
         if _env_cookies and (not _cookie_file.exists() or not _cookie_file.read_text(encoding="utf-8").strip()):
             _cookie_file.write_text(_env_cookies, encoding="utf-8")
+
         env = os.environ.copy()
         env["BOT_DATA_DIR"] = str(u_dir(uid))
-        is_cloud    = bool(os.environ.get("RENDER") or os.environ.get("RAILWAY_ENVIRONMENT"))
+        is_cloud = bool(os.environ.get("RENDER") or os.environ.get("RAILWAY_ENVIRONMENT"))
         is_headless = os.environ.get("ATG_HEADLESS") == "1"
-
-        # Check if user has YouTube token (from Google login)
         has_yt_token = u_file(uid, "yt_token.json").exists()
+        mode = "api" if is_cloud and has_yt_token else ("mobile" if is_cloud or is_headless else "desktop")
+        if mode == "mobile" and not _env_cookies and not _cookie_file.exists():
+            return jsonify({"ok": False, "msg": "Mobile mode requires YouTube cookies. Save them in Settings first."}), 400
 
-        if is_cloud and has_yt_token:
-            # Cloud + Google login = YouTube API bot (best)
-            cmd = [sys.executable, "-c", "from youtube_bot import start_bot; start_bot()"]
-        elif is_cloud or is_headless:
-            # Cloud without token = cookie-based bot
-            cmd = [sys.executable, "-c", "from bot_mobile import start_bot; start_bot()"]
-        elif getattr(sys, "frozen", False):
+        if getattr(sys, "frozen", False):
+            # The packaged launcher owns the child entry point.
+            env["ATG_BOT_MODE"] = mode
             cmd = [sys.executable, "--bot-mode", str(u_dir(uid))]
         else:
-            cmd = [sys.executable, "-c", "from bot import start_bot; start_bot()"]
-        proc = subprocess.Popen(
-            cmd,
-            cwd=str(BASE_DIR),
-            env=env,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0,
-        )
+            # Wrapper records import/driver failures that would otherwise disappear in DEVNULL.
+            cmd = [sys.executable, str(BASE_DIR / "bot_runner.py"), mode]
+
+        try:
+            proc = subprocess.Popen(
+                cmd,
+                cwd=str(BASE_DIR),
+                env=env,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0,
+            )
+        except OSError as exc:
+            log_f.write_text(f"ERROR | Could not start bot process: {exc}\n", encoding="utf-8")
+            return jsonify({"ok": False, "msg": "Could not create the bot process. Open Logs for details."}), 500
+
         _bots[str(uid)] = proc
-    return jsonify({"ok": True, "msg": "Bot started"})
+        # Immediate import/config failures happen before a user can see a running status.
+        time.sleep(0.4)
+        if proc.poll() is not None:
+            _bots.pop(str(uid), None)
+            return jsonify({"ok": False, "msg": "Bot stopped during startup. Open Logs for the exact error."}), 500
+
+    return jsonify({"ok": True, "msg": f"Bot started in {mode} mode."})
 
 
 @app.route("/api/stop", methods=["POST"])
@@ -869,20 +885,23 @@ def download_android():
     """Android/Termux package ZIP serve karo"""
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        # App data is writable but source files/templates live in the bundle when packaged.
+        source_dir = Path(os.environ.get("ATG_BUNDLE_DIR", str(BASE_DIR)))
         android_files = [
-            "termux_app.py", "termux_setup.sh", "bot_mobile.py",
-            "web_panel.py", "config.json", "oauth_config.json",
+            "termux_app.py", "termux_setup.sh", "bot_mobile.py", "bot_runner.py",
+            "web_panel.py", "config.example.json", "oauth_config.example.json",
+            "requirements.txt",
         ]
         for fname in android_files:
-            p = BASE_DIR / fname
-            if p.exists():
-                zf.write(p, fname)
-        # Templates folder
-        tmpl = BASE_DIR / "templates"
-        if tmpl.exists():
-            for f in tmpl.rglob("*"):
-                if f.is_file():
-                    zf.write(f, f.relative_to(BASE_DIR))
+            file_path = source_dir / fname
+            if file_path.exists():
+                zf.write(file_path, fname)
+        for folder_name in ("templates", "static"):
+            folder = source_dir / folder_name
+            if folder.exists():
+                for file_path in folder.rglob("*"):
+                    if file_path.is_file():
+                        zf.write(file_path, file_path.relative_to(source_dir))
     buf.seek(0)
     return send_file(
         buf,

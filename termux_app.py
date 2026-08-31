@@ -33,13 +33,17 @@ os.chdir(str(APP_DIR))
 sys.path.insert(0, str(BUNDLE_DIR))
 
 
-# ─── Copy defaults ────────────────────────────────────────────────────────────
+# ─── Copy tracked examples into Termux app-data on first run ─────────────────
 def _copy_defaults():
-    for name in ("config.json", "oauth_config.json"):
-        src = BUNDLE_DIR / name
-        dst = APP_DIR / name
+    import shutil
+    defaults = {
+        "config.json": "config.example.json",
+        "oauth_config.json": "oauth_config.example.json",
+    }
+    for destination_name, source_name in defaults.items():
+        src = BUNDLE_DIR / source_name
+        dst = APP_DIR / destination_name
         if src.exists() and not dst.exists():
-            import shutil
             shutil.copy2(src, dst)
 
 _copy_defaults()
@@ -66,7 +70,7 @@ print("╠═══════════════════════�
 print(f"║  Browser mein kholo: http://localhost:5000   ║")
 print(f"║  Same WiFi pe:  http://{ip}:5000".ljust(47) + "║")
 print("╠══════════════════════════════════════════════╣")
-print("║  Mode: YouTube API (Chrome nahi chahiye)     ║")
+print("║  Mode: Cookie-based mobile mode (Chrome nahi chahiye)     ║")
 print("╚══════════════════════════════════════════════╝")
 print()
 

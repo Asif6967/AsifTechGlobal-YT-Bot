@@ -48,9 +48,10 @@ if "--bot-mode" in sys.argv:
     os.environ["BOT_DATA_DIR"] = data_dir
     os.chdir(str(BUNDLE_DIR))
     sys.path.insert(0, str(BUNDLE_DIR))
-    from bot import start_bot
-    start_bot()
-    sys.exit(0)
+    from bot_runner import main as run_selected_bot
+    selected_mode = os.environ.get("ATG_BOT_MODE", "desktop")
+    sys.argv = ["bot_runner.py", selected_mode]
+    sys.exit(run_selected_bot())
 
 # ─── NORMAL MODE: Web Server ──────────────────────────────────────────────────
 
@@ -62,20 +63,26 @@ os.environ["ATG_APP_DIR"]    = str(APP_DIR)
 os.chdir(str(APP_DIR))
 sys.path.insert(0, str(BUNDLE_DIR))
 
-# Copy default config files to AppData on first run
+# Copy tracked example files into the writable app-data directory on first run.
 def _copy_defaults():
-    for name in ("config.json", "oauth_config.json"):
-        src = BUNDLE_DIR / name
-        dst = APP_DIR / name
+    import shutil
+    defaults = {
+        "config.json": "config.example.json",
+        "oauth_config.json": "oauth_config.example.json",
+    }
+    for destination_name, source_name in defaults.items():
+        src = BUNDLE_DIR / source_name
+        dst = APP_DIR / destination_name
         if src.exists() and not dst.exists():
-            import shutil
             shutil.copy2(src, dst)
 
 _copy_defaults()
 
 # ─── Windows Firewall: Mobile access ke liye port 5000 open karo ─────────────
 def add_firewall_rule():
-    """Port 5000 pe inbound rule add karo taake mobile access kar sake"""
+    """Add the optional Windows firewall rule used for local mobile access."""
+    if os.name != "nt":
+        return
     try:
         rule = "AsifTechGlobal-Bot"
         check = subprocess.run(
@@ -110,22 +117,29 @@ def get_ip():
 
 
 def speak(text):
-    """TTS via PowerShell .NET Speech"""
-    t = text.replace("'", "").replace("\\", "")
-    ps = (f"Add-Type -AssemblyName System.Speech;"
-          f"$v=New-Object System.Speech.Synthesis.SpeechSynthesizer;"
-          f"$v.Rate=-2;$v.Volume=100;$v.Speak('{t}');")
-    subprocess.Popen(
-        ["powershell.exe", "-WindowStyle", "Hidden", "-NonInteractive", "-Command", ps],
-        creationflags=subprocess.CREATE_NO_WINDOW,
-    )
+    """Optional Windows-only TTS; startup must never depend on PowerShell."""
+    if os.name != "nt":
+        return
+    try:
+        t = text.replace("'", "").replace("\\", "")
+        ps = (f"Add-Type -AssemblyName System.Speech;"
+              f"$v=New-Object System.Speech.Synthesis.SpeechSynthesizer;"
+              f"$v.Rate=-2;$v.Volume=100;$v.Speak('{t}');")
+        subprocess.Popen(
+            ["powershell.exe", "-WindowStyle", "Hidden", "-NonInteractive", "-Command", ps],
+            creationflags=subprocess.CREATE_NO_WINDOW,
+        )
+    except Exception:
+        pass
 
+
+PORT = int(os.environ.get("PORT", "5000"))
 
 def run_server():
     from web_panel import app as flask_app, init_db, USER_DATA
     init_db()
     USER_DATA.mkdir(parents=True, exist_ok=True)
-    flask_app.run(host="0.0.0.0", port=5000, debug=False,
+    flask_app.run(host="0.0.0.0", port=PORT, debug=False,
                   threaded=True, use_reloader=False)
 
 
@@ -150,9 +164,9 @@ banner = f"""
 {R}
 {B}{C}  AsifTechGlobal — YouTube Live Bot  v1.0{R}
 {Y}  ══════════════════════════════════════════════════{R}
-  {G}✓{R} PC Browser  :  {B}http://localhost:5000{R}
-  {G}✓{R} Mobile/Phone:  {B}http://{ip}:5000{R}
-  {G}✓{R} iPhone/iPad :  {B}http://{ip}:5000{R}
+  {G}✓{R} PC Browser  :  {B}http://localhost:{PORT}{R}
+  {G}✓{R} Mobile/Phone:  {B}http://{ip}:{PORT}{R}
+  {G}✓{R} iPhone/iPad :  {B}http://{ip}:{PORT}{R}
   {G}✓{R} Koi bhi device (same Wi-Fi pe) browser mein{R}
 {Y}  ══════════════════════════════════════════════════{R}
   {M}Register karein  →  Login  →  Bot use karein{R}
@@ -180,12 +194,12 @@ for _ in range(6):
 print(f" {G}{B}Ready!{R}\n")
 
 # Auto-open browser
-opened = open_browser_url("http://localhost:5000")
+opened = open_browser_url(f"http://localhost:{PORT}")
 if opened:
     print(f"  {G}✓{R} Browser opened automatically.")
 else:
-    print(f"  {Y}⚠{R} Browser could not be opened automatically. Please open http://localhost:5000 manually.")
-print(f"  {C}📱 Mobile URL: http://{ip}:5000{R}")
+    print(f"  {Y}⚠{R} Browser could not be opened automatically. Please open http://localhost:{PORT} manually.")
+print(f"  {C}📱 Mobile URL: http://{ip}:{PORT}{R}")
 print(f"  {Y}⚠  Close this window to stop the server.{R}")
 print(f"  {Y}   Press Ctrl+C to exit.{R}\n")
 
