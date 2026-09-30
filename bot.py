@@ -537,18 +537,76 @@ def find_chat_input(driver, logger=None):
     return None
 
 
+def _get_chrome_major_version():
+    """Detect installed Chrome's major version number."""
+    import subprocess
+    paths = [
+        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+    ]
+    for p in paths:
+        if os.path.exists(p):
+            try:
+                result = subprocess.run(
+                    [p, "--version"],
+                    capture_output=True, text=True, timeout=5,
+                    creationflags=0x08000000
+                )
+                ver_str = result.stdout.strip()  # e.g. "Google Chrome 154.0.8037.58"
+                parts = ver_str.split()
+                if parts:
+                    return int(parts[-1].split(".")[0])
+            except Exception:
+                pass
+    return None
+
+
+def _get_driver_major_version(driver_path):
+    """Get ChromeDriver's supported Chrome major version."""
+    import subprocess
+    try:
+        result = subprocess.run(
+            [driver_path, "--version"],
+            capture_output=True, text=True, timeout=5,
+            creationflags=0x08000000
+        )
+        ver_str = result.stdout.strip()  # e.g. "ChromeDriver 152.0.7849.142"
+        parts = ver_str.split()
+        if len(parts) >= 2:
+            return int(parts[1].split(".")[0])
+    except Exception:
+        pass
+    return None
+
+
 def get_driver(options, logger):
-    """Start ChromeDriver with a quick retry for transient startup failures."""
+    """Start ChromeDriver — auto-updates if Chrome version changed."""
+    chrome_major = _get_chrome_major_version()
+    if chrome_major:
+        logger.info(f"Detected Chrome version: {chrome_major}")
+
     cached_drivers = glob.glob(
         os.path.join(os.path.expanduser("~"), ".wdm", "drivers", "chromedriver", "**", "chromedriver.exe"),
         recursive=True,
     )
     driver_path = max(cached_drivers, key=os.path.getmtime) if cached_drivers else None
+
+    # ── Check for version mismatch → force fresh download ─────────────────────
+    if driver_path and chrome_major:
+        driver_major = _get_driver_major_version(driver_path)
+        if driver_major and driver_major != chrome_major:
+            logger.warning(
+                f"ChromeDriver v{driver_major} ≠ Chrome v{chrome_major} — "
+                f"downloading matching driver..."
+            )
+            driver_path = None   # Force re-download below
+
     if not driver_path:
         try:
             driver_path = ChromeDriverManager().install()
+            logger.info(f"ChromeDriver installed: {driver_path}")
         except Exception as e:
-            logger.warning(f"ChromeDriver lookup failed: {e}")
+            logger.warning(f"ChromeDriver download failed: {e}")
 
     for attempt in range(1, 3):
         try:

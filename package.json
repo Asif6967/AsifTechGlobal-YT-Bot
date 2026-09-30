@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "@aws-sdk/client-bedrock-runtime": "^3.1081.0"
+    "@aws-sdk/client-bedrock-runtime": "^3.1081.0",
+    "chromedriver": "^154.0.1"
   }
 }
